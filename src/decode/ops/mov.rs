@@ -23,12 +23,12 @@ impl MovOp {
     pub fn try_parse(bytes: &[u8]) -> Result<(Self, &[u8]), DecodeError> {
         let direction = Direction::parse_byte(bytes[0]);
         let width = Width::parse_byte(bytes[0]);
-        let mode = Mode::try_parse_byte(bytes[1])?;
         let reg = Reg::parse_byte_mid(bytes[1]);
         let rm = RM::parse_byte(bytes[1]);
+        let mode = Mode::try_parse_byte(bytes[1])?;
 
-        let (source, dest) = get_operands(direction, mode, width, reg, rm);
-
+        let (source, dest, bytes) = get_operands(mode, direction, width, reg, rm, &bytes);
+        println!("Here");
         Ok((MovOp::new(source, dest), &bytes[2..]))
     }
 }

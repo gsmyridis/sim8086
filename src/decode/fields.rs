@@ -71,10 +71,10 @@ impl From<bool> for Direction {
 ///  TODO: Add more.
 #[derive(Debug, PartialEq)]
 pub enum Mode {
-    Mem,
-    Mem8,
-    Mem16,
-    Reg,
+    Memory,
+    Memory8,
+    Memory16,
+    Register,
 }
 
 impl Mode {
@@ -84,6 +84,16 @@ impl Mode {
     pub fn try_parse_byte(byte: u8) -> Result<Self, DecodeError> {
         Self::try_from((byte >> 6) & 0b11)
     }
+
+    /// Calculates how many bytes it needs to take to read the displacements.
+    fn n_bytes(mode: &Mode, rm: &RM) ->  u8 {
+        match mode {
+            Mode::Memory => if rm.as_u8() == 0b110 { 2 } else { 0 },
+            Mode::Memory8 => 1,
+            Mode::Memory16 => 2,
+            Mode::Register => 0 
+        }
+    }
 }
 
 impl TryFrom<u8> for Mode {
@@ -91,10 +101,10 @@ impl TryFrom<u8> for Mode {
 
     fn try_from(code: u8) -> Result<Self, Self::Error> {
         match code {
-            0b00 => Ok(Self::Mem),
-            0b01 => Ok(Self::Mem8),
-            0b10 => Ok(Self::Mem16),
-            0b11 => Ok(Self::Reg),
+            0b00 => Ok(Self::Memory),
+            0b01 => Ok(Self::Memory8),
+            0b10 => Ok(Self::Memory16),
+            0b11 => Ok(Self::Register),
             _ => Err(DecodeError),
         }
     }
@@ -124,8 +134,10 @@ impl Into<u8> for Reg {
 /// how the mode field is set. If the `MOD` selects memory mode,
 /// then `R/M` indicates how the effective address of the memory
 /// operand is to be calculated.
+//TODO: MAYBE Create construction method that checks that its <= 0b111
 #[derive(Debug)]
 pub struct RM(u8);
+
 
 impl RM {
     /// Parses a byte and extracts the R/M fields.
@@ -133,6 +145,11 @@ impl RM {
     /// The R/M fields are the three least significant bits.
     pub fn parse_byte(byte: u8) -> Self {
         Self(byte & 0b111)
+    }
+
+    #[inline]
+    pub fn as_u8(&self) -> u8 {
+        self.0
     }
 }
 
@@ -162,10 +179,10 @@ mod tests {
 
     #[test]
     fn test_parse_mode() {
-        assert_eq!(Mode::try_parse_byte(0b00011010).unwrap(), Mode::Mem);
-        assert_eq!(Mode::try_parse_byte(0b01011010).unwrap(), Mode::Mem8);
-        assert_eq!(Mode::try_parse_byte(0b10011010).unwrap(), Mode::Mem16);
-        assert_eq!(Mode::try_parse_byte(0b11111010).unwrap(), Mode::Reg);
+        assert_eq!(Mode::try_parse_byte(0b00011010).unwrap(), Mode::Memory);
+        assert_eq!(Mode::try_parse_byte(0b01011010).unwrap(), Mode::Memory8);
+        assert_eq!(Mode::try_parse_byte(0b10011010).unwrap(), Mode::Memory16);
+        assert_eq!(Mode::try_parse_byte(0b11111010).unwrap(), Mode::Register);
     }
 
     #[test]
