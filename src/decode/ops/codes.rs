@@ -6,8 +6,8 @@ pub enum OpCode {
     MovImReg = 0b1011,
     MovMemAcc = 0b1010000,
     MovAccMem = 0b1010001,
-    MovRMSegMem = 0b10001110, 
-    MovSegMemRM = 0b10001100, 
+    MovRMSegReg = 0b10001110, 
+    MovSegRegRM = 0b10001100, 
 }
 
 impl OpCode {

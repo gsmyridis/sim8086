@@ -35,7 +35,20 @@ impl Instruction {
             MovOp::try_parse_im_rm(bytes)?
         } else if has_prefix(bytes[0], OpCode::MovImReg.into(), 4) {
             MovOp::try_parse_im_reg(bytes)?
+        } else if has_prefix(bytes[0], OpCode::MovMemAcc.into(), 7) {
+            println!("Memory Accumulator");
+            todo!();
+        } else if has_prefix(bytes[0], OpCode::MovAccMem.into(), 7) {
+            println!("Accumulator Memory");
+            todo!();
+        } else if has_prefix(bytes[0], OpCode::MovRMSegReg.into(), 8) {
+            println!("Segment memory");
+            todo!();
+        } else if has_prefix(bytes[0], OpCode::MovSegRegRM.into(), 8) {
+            println!("Segment register");
+            todo!();
         } else {
+            println!("{:b}", bytes[0]);
             todo!();
         };
         Ok((Instruction::Mov(movop), rest))
