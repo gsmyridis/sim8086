@@ -29,18 +29,16 @@ impl Instruction {
     /// reference to the array with the rest of the bytes. Otherwise it returns the parsing 
     /// error.
     pub fn try_parse_next(bytes: &[u8]) -> Result<(Instruction, &[u8]), DecodeError> {
-        if has_prefix(bytes[0], OpCode::Mov.into(), 6) {
-            match MovOp::try_parse(bytes) {
-                Ok((movop, rest)) => Ok((Instruction::Mov(movop), rest)),
-                Err(err) => Err(err),
-            }
+        let (movop, rest) = if has_prefix(bytes[0], OpCode::MovRegRM.into(), 6) {
+            MovOp::try_parse_reg_rm(bytes)?
         } else if has_prefix(bytes[0], OpCode::MovImRM.into(), 7) {
-            todo!();
+            MovOp::try_parse_im_rm(bytes)?
         } else if has_prefix(bytes[0], OpCode::MovImReg.into(), 4) {
-            todo!();
+            MovOp::try_parse_im_reg(bytes)?
         } else {
             todo!();
-        }
+        };
+        Ok((Instruction::Mov(movop), rest))
     }
 
     /// Tries to decode all instructions from binary representation of the machine code.
@@ -53,7 +51,6 @@ impl Instruction {
         while !bytes_.is_empty() {
             let (instr, rest) = Self::try_parse_next(bytes_)?;
             bytes_ = rest;
-            println!("{instr:?}");
             instructions.push(instr);
         }
         Ok(instructions)
@@ -109,7 +106,7 @@ mod tests {
             0xb9, 0x0c, 0x00, 0xb9, 0xf4, 0xff, 0xba, 0x6c,
             0x0f, 0xba, 0x94, 0xf0, 0x8a, 0x00, 0x8b, 0x1b,
             0x8b, 0x56, 0x00, 0x8a, 0x60, 0x04, 0x8a, 0x80,
-            0x87, 0x13, 0x89, 0x09, 0x88, 0x0a, 0x88, 0x63,
+            0x87, 0x13, 0x89, 0x09, 0x88, 0x0a, 0x88, 0x6e,
             0x00,
         ];
 
@@ -117,16 +114,16 @@ mod tests {
             "mov si, bx",
             "mov dh, al",
             "mov cl, 12",
-            "mov ch, -12",
+            "mov ch, 244",
             "mov cx, 12",
-            "mov cx, -12",
+            "mov cx, 65524",
             "mov dx, 3948",
-            "mov dx, -3948",
+            "mov dx, 61588",
             "mov al, [bx + si]",
             "mov bx, [bp + di]",
             "mov dx, [bp]",
             "mov ah, [bx + si + 4]",
-            "mov al, [bx + si + 4999]",
+            "mov al, [bx + si + 34579]",
             "mov [bx + di], cx",
             "mov [bp + si], cl",
             "mov [bp], ch",

@@ -11,23 +11,44 @@ pub enum Width {
 }
 
 impl Width {
-    /// Parses a byte and extracts the width field.
-    ///
-    /// The width field is the least significant bit.
+    /// Parses a byte and extracts the width field from the least 
+    /// significant bit.
+    #[inline]
     pub fn parse_byte(byte: u8) -> Self {
-        match (byte & 0b1) != 0 {
-            false => Self::Byte,
-            true => Self::Word,
-        }
+        Self::from((byte & 0b1) != 0)
+    }
+
+    /// Parses a byte and extracts the width field from the fourth
+    /// least significant bit.
+    #[inline]
+    pub fn parse_byte_mid(byte: u8) -> Self {
+        Self::from((byte & 0b1000) != 0)
     }
 
     /// Returns the width as a bit, in a boolean representation.
     ///
     /// If the width is word `true` is returned; otherwise, `false`.
+    #[inline]
     pub fn as_bool(&self) -> bool {
         match self {
             Self::Byte => false,
             Self::Word => true,
+        }
+    }
+
+    /// Returns the width's equivalend in number of bytes.
+    #[inline]
+    pub fn n_bytes(&self) -> usize {
+        self.as_bool() as usize + 1
+    }
+}
+
+impl From<bool> for Width {
+    #[inline]
+    fn from(bit: bool) -> Self {
+        match bit {
+            false => Self::Byte,
+            true => Self::Word,
         }
     }
 }
@@ -48,12 +69,14 @@ impl Direction {
     /// Parses a byte and extracts the direction field.
     ///
     /// The direction field is the second least significant bit.
+    #[inline]
     pub fn parse_byte(byte: u8) -> Self {
         Self::from((byte >> 1) & 1 == 1)
     }
 }
 
 impl From<bool> for Direction {
+    #[inline]
     fn from(bit: bool) -> Self {
         match bit {
             true => Self::Destination,
@@ -81,13 +104,14 @@ impl Mode {
     /// Parses a byte and extracts the mode fields.
     ///
     /// The mode fields are the 2 most significant bits.
+    #[inline]
     pub fn try_parse_byte(byte: u8) -> Result<Self, DecodeError> {
         Self::try_from((byte >> 6) & 0b11)
     }
 
     /// Calculates how many bytes it needs to take to read the displacements.
-    fn n_bytes(mode: &Mode, rm: &RM) ->  u8 {
-        match mode {
+    pub fn n_bytes(&self, rm: &RM) ->  u8 {
+        match self {
             Mode::Memory => if rm.as_u8() == 0b110 { 2 } else { 0 },
             Mode::Memory8 => 1,
             Mode::Memory16 => 2,
@@ -105,7 +129,7 @@ impl TryFrom<u8> for Mode {
             0b01 => Ok(Self::Memory8),
             0b10 => Ok(Self::Memory16),
             0b11 => Ok(Self::Register),
-            _ => Err(DecodeError),
+            _ => Err(DecodeError::ModeError),
         }
     }
 }
@@ -114,15 +138,23 @@ impl TryFrom<u8> for Mode {
 pub struct Reg(u8);
 
 impl Reg {
-    /// Parses a byte and extracts the REG fields.
-    ///
-    /// The REG fields are the 4th, 5th and 6th least significant bits.
+    /// Parses a byte and extracts the REG fields from the 4th, 5th
+    /// and 6th least significant bits.
+    #[inline]
     pub fn parse_byte_mid(byte: u8) -> Self {
         Self((byte >> 3) & 0b111)
+    }
+
+    /// Parses a byte and extracts the REG fields from the three least
+    /// significant bits
+    #[inline]
+    pub fn parse_byte_low(byte: u8) -> Self {
+        Self(byte & 0b111)
     }
 }
 
 impl Into<u8> for Reg {
+    #[inline]
     fn into(self) -> u8 {
         self.0
     }
@@ -143,6 +175,7 @@ impl RM {
     /// Parses a byte and extracts the R/M fields.
     ///
     /// The R/M fields are the three least significant bits.
+    #[inline]
     pub fn parse_byte(byte: u8) -> Self {
         Self(byte & 0b111)
     }
@@ -154,6 +187,7 @@ impl RM {
 }
 
 impl Into<u8> for RM {
+    #[inline]
     fn into(self) -> u8 {
         self.0
     }
@@ -168,6 +202,9 @@ mod tests {
     fn test_parse_width() {
         assert_eq!(Width::parse_byte(0b10101010).as_bool(), false);
         assert_eq!(Width::parse_byte(0b10101011).as_bool(), true);
+
+        assert_eq!(Width::parse_byte_mid(0b10101010).as_bool(), true);
+        assert_eq!(Width::parse_byte_mid(0b10100010).as_bool(), false);
     }
 
     #[test]
@@ -186,9 +223,12 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_reg_mid() {
+    fn test_parse_reg() {
         assert_eq!(Reg::parse_byte_mid(0b10011110).0, 0b011);
         assert_eq!(Reg::parse_byte_mid(0b11111010).0, 0b111);
+
+        assert_eq!(Reg::parse_byte_low(0b10011110).0, 0b110);
+        assert_eq!(Reg::parse_byte_low(0b11111010).0, 0b010);
     }
 
     #[test]

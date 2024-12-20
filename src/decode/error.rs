@@ -1,2 +1,7 @@
 #[derive(Debug)]
-pub struct DecodeError;
+pub enum DecodeError {
+    ModeError,
+    DisplacementError,
+}
+
+pub type DResult<I, O> = Result<(I, O), DecodeError>;

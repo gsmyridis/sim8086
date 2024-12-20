@@ -1,7 +1,7 @@
 #[repr(u8)]
 pub enum OpCode {
     /// MOV
-    Mov = 0b100010,
+    MovRegRM = 0b100010,
     MovImRM = 0b1100011,
     MovImReg = 0b1011,
     MovMemAcc = 0b1010000,

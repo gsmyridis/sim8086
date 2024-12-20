@@ -3,26 +3,68 @@ use std::fmt;
 use super::fields::{Direction, Mode, Reg, Width, RM};
 use crate::register::Register;
 use crate::decode::address::{Displacement, EffectiveAddr};
+use crate::decode::error::DResult;
 
+
+#[derive(Debug)]
+pub enum Value {
+    Byte(u8),
+    Word(u16),
+}
+
+
+impl fmt::Display for Value {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Value::Byte(val) => write!(f, "{val}"),
+            Value::Word(val) => write!(f, "{val}"),
+        }
+    }
+}
+
+
+/// A struct representing an instruction operand.
 ///
+/// Instructions have one or two operands, each one being either, a register,
+/// a memory address or an immediate value. 
 #[derive(Debug)]
 pub enum Operand {
     Register(Register),
     Memory(EffectiveAddr),
-
+    Immediate(Value),
 }
 
 impl Operand {
     /// Creates a new register operand from code and width field.
     #[inline]
-    pub fn new_register(rm: u8, width: &Width) -> Self {
-        Self::Register(Register::from(rm, width.as_bool()))
+    pub fn register(rm: u8, width: bool) -> Self {
+        Self::Register(Register::from(rm, width))
     }
 
-    pub fn new_memory(rm: u8, disp: Displacement) -> Operand {
+    /// Creates a new memory operand from R/M field and `Displacement`.
+    #[inline]
+    pub fn memory(rm: u8, disp: Displacement) -> Operand {
         Self::Memory(EffectiveAddr::new(rm, disp))
     }
 
+    /// Creates an immediate value operand from a `Value`.
+    #[inline]
+    pub fn immediate(value: Value) -> Operand {
+        Self::Immediate(value)
+    }
+
+    /// Creates a register or memory operand.
+    pub fn register_or_memory<'a>(width: bool, mode: &Mode, rm: u8, bytes: &'a[u8]) -> DResult<Self, &'a[u8]> {
+        match mode {
+            Mode::Register => {
+                Ok((Operand::register(rm, width), bytes))
+            },
+            _ => {
+                let (disp, remaining) = Displacement::new(&mode, rm, &bytes)?;
+                Ok((Operand::memory(rm, disp), remaining))
+            }
+        }
+    }
 }
 
 
@@ -34,22 +76,12 @@ pub fn get_operands<'a>(
     reg: Reg,
     rm: RM,
     bytes: &'a[u8],
-) -> (Operand, Operand, &'a[u8]) {
-    let mut bytes_rest = bytes;
-    let reg_operand = Operand::new_register(reg.into(), &width);
-    let rm_operand = match mode {
-        Mode::Register => Operand::new_register(rm.into(), &width),
-        _ => {
-            let (disp, b) = Displacement::new(&mode, &rm, &bytes).expect("Failed to create a displacement");
-            bytes_rest = b;
-            println!("{:?}", disp);
-            Operand::new_memory(rm.into(), disp)
-        }
-    };
-
+) -> DResult<(Operand, Operand), &'a[u8]> {
+    let reg_operand = Operand::register(reg.into(), width.as_bool());
+    let (rm_operand, remaining) = Operand::register_or_memory(width.as_bool(), &mode, rm.as_u8(), bytes)?;
     match direction {
-        Direction::Source => (reg_operand, rm_operand, &bytes_rest),
-        Direction::Destination => (rm_operand, reg_operand, &bytes_rest),
+        Direction::Source => Ok(((reg_operand, rm_operand), remaining)),
+        Direction::Destination => Ok(((rm_operand, reg_operand), &remaining)),
     }
 }
 
@@ -58,7 +90,8 @@ impl fmt::Display for Operand {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Register(reg) => write!(f, "{reg}"),
-            _ => f.write_str("ADDRESS"),
+            Self::Immediate(val) => write!(f, "{val}"),
+            Self::Memory(addr) => write!(f, "{addr}")
         }
     }
 }

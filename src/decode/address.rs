@@ -1,5 +1,7 @@
+use std::fmt;
+
 use crate::register::Register;
-use super::fields::{Mode, RM};
+use super::fields::Mode;
 use crate::decode::error::DecodeError;
 
 
@@ -14,10 +16,10 @@ pub enum Displacement {
 impl Displacement {
 
     /// Calculates how many bytes it needs to take to read the displacements.
-    pub fn new<'a>(mode: &Mode, rm: &RM, bytes: &'a[u8]) ->  Result<(Self, &'a[u8]), DecodeError> {
+    pub fn new<'a>(mode: &Mode, rm: u8, bytes: &'a[u8]) ->  Result<(Self, &'a[u8]), DecodeError> {
         match mode {
             Mode::Memory => {
-                if rm.as_u8() == 0b110 {
+                if rm == 0b110 {
                     assert!(bytes.len() >= 2, "The byte array is too short.");
                     let addr = u16::from_be_bytes([bytes[0], bytes[1]]);
                     Ok((Displacement::NoneDirect(addr), &bytes[2..]))
@@ -34,7 +36,30 @@ impl Displacement {
                 let addr = u16::from_be_bytes([bytes[0], bytes[1]]);
                 Ok((Displacement::Word(addr), &bytes[2..]))
             },
-            Mode::Register => Err(DecodeError)
+            Mode::Register => Err(DecodeError::DisplacementError)
+        }
+    }
+}
+
+
+impl fmt::Display for Displacement {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::NoneDirect(val) | Self::Word(val) => {
+                if *val != 0 { 
+                    write!(f, " + {val}") 
+                } else {
+                    write!(f, "")
+                }
+            },
+            Self::Byte(val) => {
+                if *val != 0 {
+                    write!(f, " + {val}")
+                } else {
+                    write!(f, "")
+                }
+            },
+            Self::None => write!(f, "")
         }
     }
 }
@@ -90,6 +115,21 @@ impl EffectiveAddr {
             },
             0b111 => Self::register(Register::BX, disp),
             _ => panic!("Invalid value for R/M")
+        }
+    }
+}
+
+
+impl fmt::Display for EffectiveAddr {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Direct(val) => write!(f, "[{val}]"),
+            Self::Reg(reg) => write!(f, "[{reg}]"),
+            Self::RegDisp { base, disp } => {
+                write!(f, "[{base}{disp}]")
+            },
+            Self::RegPair { base, index } => write!(f, "[{base} + {index}]"),
+            Self::RegPairDisp { base, index, disp } => write!(f, "[{base} + {index}{disp}]"),
         }
     }
 }
