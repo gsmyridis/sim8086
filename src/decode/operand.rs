@@ -60,7 +60,7 @@ impl Operand {
                 Ok((Operand::register(rm, width), bytes))
             },
             _ => {
-                let (disp, remaining) = Displacement::new(&mode, rm, &bytes)?;
+                let (disp, remaining) = Displacement::new(mode, rm, bytes)?;
                 Ok((Operand::memory(rm, disp), remaining))
             }
         }
@@ -69,19 +69,19 @@ impl Operand {
 
 
 /// Returns the source and destination register operands.
-pub fn get_operands<'a>(
+pub fn get_operands(
     mode: Mode,
     direction: Direction,
     width: Width,
     reg: Reg,
     rm: RM,
-    bytes: &'a[u8],
-) -> DResult<(Operand, Operand), &'a[u8]> {
+    bytes: &[u8],
+) -> DResult<(Operand, Operand), &[u8]> {
     let reg_operand = Operand::register(reg.into(), width.as_bool());
     let (rm_operand, remaining) = Operand::register_or_memory(width.as_bool(), &mode, rm.as_u8(), bytes)?;
     match direction {
         Direction::Source => Ok(((reg_operand, rm_operand), remaining)),
-        Direction::Destination => Ok(((rm_operand, reg_operand), &remaining)),
+        Direction::Destination => Ok(((rm_operand, reg_operand), remaining)),
     }
 }
 

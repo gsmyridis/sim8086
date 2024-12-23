@@ -28,7 +28,7 @@ impl Displacement {
                 }
             },
             Mode::Memory8 => {
-                assert!(bytes.len() >= 1, "The byte array is too short.");
+                assert!(!bytes.is_empty(), "The byte array is too short.");
                 Ok((Displacement::Byte(bytes[0]), &bytes[1..]))
             },
             Mode::Memory16 => {
@@ -36,7 +36,7 @@ impl Displacement {
                 let addr = u16::from_be_bytes([bytes[0], bytes[1]]);
                 Ok((Displacement::Word(addr), &bytes[2..]))
             },
-            Mode::Register => Err(DecodeError::DisplacementError)
+            Mode::Register => Err(DecodeError::Displacement)
         }
     }
 }
@@ -45,20 +45,8 @@ impl Displacement {
 impl fmt::Display for Displacement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::NoneDirect(val) | Self::Word(val) => {
-                if *val != 0 { 
-                    write!(f, " + {val}") 
-                } else {
-                    write!(f, "")
-                }
-            },
-            Self::Byte(val) => {
-                if *val != 0 {
-                    write!(f, " + {val}")
-                } else {
-                    write!(f, "")
-                }
-            },
+            Self::NoneDirect(val) | Self::Word(val) => write!(f, " + {val}"),
+            Self::Byte(val) => write!(f, " + {val}"),
             Self::None => write!(f, "")
         }
     }
@@ -125,9 +113,7 @@ impl fmt::Display for EffectiveAddr {
         match self {
             Self::Direct(val) => write!(f, "[{val}]"),
             Self::Reg(reg) => write!(f, "[{reg}]"),
-            Self::RegDisp { base, disp } => {
-                write!(f, "[{base}{disp}]")
-            },
+            Self::RegDisp { base, disp } => write!(f, "[{base}{disp}]"),
             Self::RegPair { base, index } => write!(f, "[{base} + {index}]"),
             Self::RegPairDisp { base, index, disp } => write!(f, "[{base} + {index}{disp}]"),
         }

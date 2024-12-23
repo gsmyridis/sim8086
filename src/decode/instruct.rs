@@ -1,23 +1,13 @@
 use std::fmt;
 
 use super::error::DecodeError;
-use super::ops::{MovOp, OpCode};
+use super::ops::{NumOp, NumOpType, MovOp, OpCode};
+use super::ops::OpCode::*;
 
 #[derive(Debug)]
 pub enum Instruction {
     Mov(MovOp),
-}
-
-impl fmt::Display for Instruction {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Mov(op) => write!(f, "{op}"),
-        }
-    }
-}
-
-fn has_prefix(byte: u8, prefix: u8, prefix_len: u8) -> bool {
-    byte >> (8 - prefix_len) == prefix
+    Num(NumOp),
 }
 
 impl Instruction {
@@ -28,47 +18,100 @@ impl Instruction {
     /// to decode the next instruction. If it succeeds, it returns the instruction and a 
     /// reference to the array with the rest of the bytes. Otherwise it returns the parsing 
     /// error.
-    pub fn try_parse_next(bytes: &[u8]) -> Result<(Instruction, &[u8]), DecodeError> {
-        let (movop, rest) = if has_prefix(bytes[0], OpCode::MovRegRM.into(), 6) {
-            MovOp::try_parse_reg_rm(bytes)?
-        } else if has_prefix(bytes[0], OpCode::MovImRM.into(), 7) {
-            MovOp::try_parse_im_rm(bytes)?
-        } else if has_prefix(bytes[0], OpCode::MovImReg.into(), 4) {
-            MovOp::try_parse_im_reg(bytes)?
-        } else if has_prefix(bytes[0], OpCode::MovMemAcc.into(), 7) {
-            println!("Memory Accumulator");
-            todo!();
-        } else if has_prefix(bytes[0], OpCode::MovAccMem.into(), 7) {
-            println!("Accumulator Memory");
-            todo!();
-        } else if has_prefix(bytes[0], OpCode::MovRMSegReg.into(), 8) {
-            println!("Segment memory");
-            todo!();
-        } else if has_prefix(bytes[0], OpCode::MovSegRegRM.into(), 8) {
-            println!("Segment register");
-            todo!();
-        } else {
-            println!("{:b}", bytes[0]);
-            todo!();
-        };
-        Ok((Instruction::Mov(movop), rest))
+    pub fn try_decode_next(bytes: &[u8]) -> Result<(Instruction, &[u8]), DecodeError> {
+        match OpCode::parse(bytes[0])? {
+            MovRegRM => {
+                let (op, rest) = MovOp::try_parse_reg_rm(bytes)?;
+                Ok((Instruction::Mov(op), rest))
+            },
+            MovImRM => {
+                let (op, rest) = MovOp::try_parse_im_rm(bytes)?;
+                Ok((Instruction::Mov(op), rest))
+            },
+            MovImReg => {
+                let (op, rest) = MovOp::try_parse_im_reg(bytes)?;
+                Ok((Instruction::Mov(op), rest))
+            },
+            MovMemAcc => {
+                todo!()
+            },
+            MovAccMem => todo!(),
+            MovRMSegReg => todo!(),
+            MovSegRegRM => todo!(),
+            NumImRM => {
+                let (op, rest) = NumOp::try_decode_im_rm(bytes)?;
+                Ok((Instruction::Num(op), rest))
+            },
+            AddRMReg => {
+                let (op, rest) = NumOp::try_decode_rm_reg(bytes, NumOpType::Add)?;
+                Ok((Instruction::Num(op), rest))
+            },
+            AdcRMReg => {
+                let (op, rest) = NumOp::try_decode_rm_reg(bytes, NumOpType::Adc)?;
+                Ok((Instruction::Num(op), rest))
+            },
+            SubRMReg => {
+                let (op, rest) = NumOp::try_decode_rm_reg(bytes, NumOpType::Sub)?;
+                Ok((Instruction::Num(op), rest))
+            },
+            SbbRMReg => {
+                let (op, rest) = NumOp::try_decode_rm_reg(bytes, NumOpType::Sbb)?;
+                Ok((Instruction::Num(op), rest))
+            },
+            CmpRMReg => {
+                let (op, rest) = NumOp::try_decode_rm_reg(bytes, NumOpType::Cmp)?;
+                Ok((Instruction::Num(op), rest))
+            },
+            AddImAcc => {
+                let (op, rest) = NumOp::try_decode_im_acc(bytes, NumOpType::Add)?;
+                Ok((Instruction::Num(op), rest))
+            },
+            AdcImAcc => {
+                let (op, rest) = NumOp::try_decode_im_acc(bytes, NumOpType::Adc)?;
+                Ok((Instruction::Num(op), rest))
+            },
+            SubImAcc => {
+                let (op, rest) = NumOp::try_decode_im_acc(bytes, NumOpType::Sub)?;
+                Ok((Instruction::Num(op), rest))
+            },
+            SbbImAcc => {
+                let (op, rest) = NumOp::try_decode_im_acc(bytes, NumOpType::Sbb)?;
+                Ok((Instruction::Num(op), rest))
+            },
+            CmpImAcc => {
+                let (op, rest) = NumOp::try_decode_im_acc(bytes, NumOpType::Cmp)?;
+                Ok((Instruction::Num(op), rest))
+            },
+        }
     }
 
     /// Tries to decode all instructions from binary representation of the machine code.
     ///
     /// Recursively
-    pub fn try_parse(bytes: &[u8]) -> Result<Vec<Instruction>, DecodeError> {
+    pub fn try_decode(bytes: &[u8]) -> Result<Vec<Instruction>, DecodeError> {
         let mut instructions = Vec::with_capacity(bytes.len());
 
         let mut bytes_ = bytes;
         while !bytes_.is_empty() {
-            let (instr, rest) = Self::try_parse_next(bytes_)?;
+            let (instr, rest) = Self::try_decode_next(bytes_)?;
             bytes_ = rest;
+            println!("{}", instr);
             instructions.push(instr);
         }
         Ok(instructions)
     }
 }
+
+
+impl fmt::Display for Instruction {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Mov(op) => write!(f, "{op}"),
+            Self::Num(op) => write!(f, "{op}"),
+        }
+    }
+}
+
 
 #[cfg(test)]
 mod tests {
@@ -77,7 +120,7 @@ mod tests {
 
     #[test]
     fn single_mov_reg_reg() {
-        let instruction = Instruction::try_parse_next(&[0x89, 0xd9])
+        let instruction = Instruction::try_decode_next(&[0x89, 0xd9])
             .expect("Guaranteed to succeed")
             .0;
         assert_eq!(&format!("{instruction}"), "mov cx, bx");
@@ -105,7 +148,7 @@ mod tests {
             "mov bp, ax",
         ];
 
-        let instructions = Instruction::try_parse(bin).unwrap();
+        let instructions = Instruction::try_decode(bin).unwrap();
         for (instr, exp) in instructions.into_iter().zip(asm) {
             assert_eq!(&format!("{instr}"), exp);
         }
@@ -134,15 +177,15 @@ mod tests {
             "mov dx, 61588",
             "mov al, [bx + si]",
             "mov bx, [bp + di]",
-            "mov dx, [bp]",
+            "mov dx, [bp + 0]",
             "mov ah, [bx + si + 4]",
             "mov al, [bx + si + 34579]",
             "mov [bx + di], cx",
             "mov [bp + si], cl",
-            "mov [bp], ch",
+            "mov [bp + 0], ch",
         ];
 
-        let instructions = Instruction::try_parse(bin).unwrap();
+        let instructions = Instruction::try_decode(bin).unwrap();
         for (instr, exp) in instructions.into_iter().zip(asm) {
             assert_eq!(&format!("{instr}"), exp);
         }

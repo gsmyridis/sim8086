@@ -1,7 +1,9 @@
 #[derive(Debug)]
 pub enum DecodeError {
-    ModeError,
-    DisplacementError,
+    Mode,
+    NumType,
+    OpCode(String),
+    Displacement,
 }
 
 pub type DResult<I, O> = Result<(I, O), DecodeError>;

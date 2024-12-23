@@ -23,37 +23,37 @@ pub enum Register {
 impl Register {
     /// Creates a register instance from a combination of code bytes and W bit.
     pub fn from(code: u8, w: bool) -> Self {
-        if code == 0b0 && w == false {
+        if code == 0b0 && !w {
             Register::AL
-        } else if code == 0b000 && w == true {
+        } else if code == 0b000 && w {
             Register::AX
-        } else if code == 0b001 && w == false {
+        } else if code == 0b001 && !w {
             Register::CL
-        } else if code == 0b001 && w == true {
+        } else if code == 0b001 && w {
             Register::CX
-        } else if code == 0b010 && w == false {
+        } else if code == 0b010 && !w {
             Register::DL
-        } else if code == 0b010 && w == true {
+        } else if code == 0b010 && w {
             Register::DX
-        } else if code == 0b011 && w == false {
+        } else if code == 0b011 && !w {
             Register::BL
-        } else if code == 0b011 && w == true {
+        } else if code == 0b011 && w {
             Register::BX
-        } else if code == 0b100 && w == false {
+        } else if code == 0b100 && !w {
             Register::AH
-        } else if code == 0b100 && w == true {
+        } else if code == 0b100 && w {
             Register::SP
-        } else if code == 0b101 && w == false {
+        } else if code == 0b101 && !w {
             Register::CH
-        } else if code == 0b101 && w == true {
+        } else if code == 0b101 && w {
             Register::BP
-        } else if code == 0b110 && w == false {
+        } else if code == 0b110 && !w {
             Register::DH
-        } else if code == 0b110 && w == true {
+        } else if code == 0b110 && w {
             Register::SI
-        } else if code == 0b111 && w == false {
+        } else if code == 0b111 && !w {
             Register::BH
-        } else if code == 0b111 && w == true {
+        } else if code == 0b111 && w {
             Register::DI
         } else {
             panic!("Invalid combination of code and w");

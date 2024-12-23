@@ -1,6 +1,7 @@
 use crate::decode::error::DecodeError;
+use super::get_bit;
 
-/// `Width` is a struct that represents the `W` field.
+/// `Width` is an enum that represents the `W` field.
 ///
 /// The `W` field distinguishes between byte and word operation.
 /// If `W = 0` the operation acts on a byte; otherwise on a word.
@@ -9,20 +10,16 @@ pub enum Width {
     Byte,
     Word,
 }
-
+ 
 impl Width {
     /// Parses a byte and extracts the width field from the least 
     /// significant bit.
     #[inline]
-    pub fn parse_byte(byte: u8) -> Self {
-        Self::from((byte & 0b1) != 0)
-    }
-
-    /// Parses a byte and extracts the width field from the fourth
-    /// least significant bit.
-    #[inline]
-    pub fn parse_byte_mid(byte: u8) -> Self {
-        Self::from((byte & 0b1000) != 0)
+    pub fn parse_byte(byte: u8, pos: u8) -> Self {
+        match get_bit(byte, pos) {
+            false => Self::Byte,
+            true => Self::Word,
+        }
     }
 
     /// Returns the width as a bit, in a boolean representation.
@@ -43,17 +40,8 @@ impl Width {
     }
 }
 
-impl From<bool> for Width {
-    #[inline]
-    fn from(bit: bool) -> Self {
-        match bit {
-            false => Self::Byte,
-            true => Self::Word,
-        }
-    }
-}
 
-/// `Direction` is a struct that represents the `D` field.
+/// `Direction` is an enum that represents the `D` field.
 ///
 /// The `D` field specifies the "direction" of the operation.
 /// For `D = 1` the `REG` field in the following byte identifies the
@@ -71,7 +59,7 @@ impl Direction {
     /// The direction field is the second least significant bit.
     #[inline]
     pub fn parse_byte(byte: u8) -> Self {
-        Self::from((byte >> 1) & 1 == 1)
+        Self::from(get_bit(byte, 1))
     }
 }
 
@@ -84,6 +72,46 @@ impl From<bool> for Direction {
         }
     }
 }
+
+
+/// `Sign` is an enum representing the `S` field.
+///
+/// The `S` field is use in conjunction with the `W` field to indicate
+/// sign extension of immediate fields in arithmetic instructions.
+/// `S = 0` indicates no sign extention, while `S = 1` instructs to
+/// sign-extend 8-bit immediate data to 16 bits if `W = 1`.
+pub enum Sign {
+    NoExtention,
+    Extend,
+}
+
+impl Sign {
+    #[inline]
+    pub fn parse_byte(byte: u8) -> Self {
+        Self::from(get_bit(byte, 1))
+    }
+
+    pub fn extend_sign(byte: u8) -> u16 {
+        if byte > 0b10000000 {
+            u16::from_le_bytes([0xFF, byte]) 
+        } else {
+            byte as u16
+        }
+    }
+}
+
+
+impl From<bool> for Sign {
+    #[inline]
+    fn from(bit: bool) -> Self {
+        match bit {
+            true => Self::Extend,
+            false => Self::NoExtention,
+        }
+    }
+}
+
+
 
 /// `Mode` is a struct that represents the `MOD` fields.
 ///
@@ -108,16 +136,6 @@ impl Mode {
     pub fn try_parse_byte(byte: u8) -> Result<Self, DecodeError> {
         Self::try_from((byte >> 6) & 0b11)
     }
-
-    /// Calculates how many bytes it needs to take to read the displacements.
-    pub fn n_bytes(&self, rm: &RM) ->  u8 {
-        match self {
-            Mode::Memory => if rm.as_u8() == 0b110 { 2 } else { 0 },
-            Mode::Memory8 => 1,
-            Mode::Memory16 => 2,
-            Mode::Register => 0 
-        }
-    }
 }
 
 impl TryFrom<u8> for Mode {
@@ -129,7 +147,7 @@ impl TryFrom<u8> for Mode {
             0b01 => Ok(Self::Memory8),
             0b10 => Ok(Self::Memory16),
             0b11 => Ok(Self::Register),
-            _ => Err(DecodeError::ModeError),
+            _ => Err(DecodeError::Mode),
         }
     }
 }
@@ -153,10 +171,10 @@ impl Reg {
     }
 }
 
-impl Into<u8> for Reg {
+impl From<Reg> for u8 {
     #[inline]
-    fn into(self) -> u8 {
-        self.0
+    fn from(reg: Reg) -> Self {
+        reg.0
     }
 }
 
@@ -166,7 +184,6 @@ impl Into<u8> for Reg {
 /// how the mode field is set. If the `MOD` selects memory mode,
 /// then `R/M` indicates how the effective address of the memory
 /// operand is to be calculated.
-//TODO: MAYBE Create construction method that checks that its <= 0b111
 #[derive(Debug)]
 pub struct RM(u8);
 
@@ -186,10 +203,10 @@ impl RM {
     }
 }
 
-impl Into<u8> for RM {
+impl From<RM> for u8 {
     #[inline]
-    fn into(self) -> u8 {
-        self.0
+    fn from(val: RM) -> Self {
+        val.0
     }
 }
 
@@ -200,11 +217,11 @@ mod tests {
 
     #[test]
     fn test_parse_width() {
-        assert_eq!(Width::parse_byte(0b10101010).as_bool(), false);
-        assert_eq!(Width::parse_byte(0b10101011).as_bool(), true);
-
-        assert_eq!(Width::parse_byte_mid(0b10101010).as_bool(), true);
-        assert_eq!(Width::parse_byte_mid(0b10100010).as_bool(), false);
+        let byte = 0b10101010;
+        assert_eq!(Width::parse_byte(byte, 0).as_bool(), false);
+        assert_eq!(Width::parse_byte(byte, 1).as_bool(), true);
+        assert_eq!(Width::parse_byte(byte, 2).as_bool(), false);
+        assert_eq!(Width::parse_byte(byte, 3).as_bool(), true);
     }
 
     #[test]

@@ -8,41 +8,28 @@ pub mod instruct;
 pub use instruct::Instruction;
 
 
+/// Returns the bit located in position `pos` from the given byte
+/// in boolean representation.
+#[inline]
+pub fn get_bit(byte: u8, pos: u8) -> bool {
+    (byte >> pos) & 1 == 1
+}
 
-// use error::{PResult, ParsingError};
-// 
-// /// Returns a reference to the `n` first bytes an 
-// pub fn take(n: usize, i: &[u8]) -> PResult<&[u8], &[u8]> {
-//     if i.len() < n {
-//         Err(ParsingError::Incomplete(n - i.len()))
-//     } else {
-//         Ok((&i[..n], &i[n..]))
-//     }
-// }
-// 
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
-// 
-//     #[test]
-//     fn test_take_success_0() {
-//         let buffer: &[u8] = &[0, 1, 2, 3, 4, 5];
-//         let (taken, rest) = take(0, buffer).unwrap();
-//         assert!(taken.is_empty());
-//         assert_eq!(rest, [0, 1, 2, 3, 4, 5]);
-//     }
-// 
-//     #[test]
-//     fn test_take_success_1() {
-//         let buffer: &[u8] = &[0, 1, 2, 3, 4, 5];
-//         let (taken, rest) = take(3, buffer).unwrap();
-//         assert_eq!(taken, [0, 1, 2]);
-//         assert_eq!(rest, [3, 4, 5]);
-//     }
-// 
-//     #[test]
-//     fn test_take_failure() {
-//         let buffer: &[u8] = &[0, 1, 2];
-//         assert_eq!(take(4, buffer), Err(ParsingError::Incomplete(1)));
-//     }
-// }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_get_bit() {
+        let byte = 0b10101010;
+        assert!(get_bit(byte, 1));
+        assert!(get_bit(byte, 3));
+        assert!(get_bit(byte, 5));
+        assert!(get_bit(byte, 7));
+        assert!(!get_bit(byte, 0));
+        assert!(!get_bit(byte, 2));
+        assert!(!get_bit(byte, 4));
+        assert!(!get_bit(byte, 6));
+    }
+}
