@@ -1,14 +1,19 @@
 use std::fmt;
 
+use crate::register::Register;
+use crate::decode::get_bit;
+use crate::decode::address::EffectiveAddr;
 use crate::decode::error::DResult;
 use crate::decode::fields::*;
 use crate::decode::operand::{get_operands, Operand, Value};
+
 
 #[derive(Debug)]
 pub struct MovOp {
     source: Operand,
     destination: Operand,
 }
+
 
 impl MovOp {
     /// Creates a new move operation with specified source and destination operands.
@@ -69,6 +74,21 @@ impl MovOp {
         let source = Operand::immediate(value);
         let dest = Operand::register(reg.into(), width.as_bool());
         Ok((MovOp::new(source, dest), &bytes[1 + n_bytes..]))
+    }
+
+    /// Decodes a Memory to Accumulator MOV instruction.
+    pub fn try_decode_mem_acc(bytes: &[u8]) -> DResult<Self, &[u8]> {
+        let addr = EffectiveAddr::Direct(u16::from_le_bytes([bytes[1], bytes[2]]));
+        let mem = Operand::Memory(addr);
+        let acc = match Width::parse_byte(bytes[0], 0) {
+            Width::Byte => Operand::Register(Register::AL),
+            Width::Word => Operand::Register(Register::AX),
+        };
+        let (source, dest) = match get_bit(bytes[0], 1) {
+            true => (acc, mem),
+            false => (mem, acc),
+        };
+        Ok((MovOp::new(source, dest), &bytes[3..]))
     }
 }
 

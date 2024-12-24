@@ -9,7 +9,7 @@ pub enum Displacement {
     None,
     NoneDirect(u16),
     Byte(u8),
-    Word(u16),
+    Word(i16),
 }
 
 impl Displacement {
@@ -19,7 +19,7 @@ impl Displacement {
             Mode::Memory => {
                 if rm == 0b110 {
                     assert!(bytes.len() >= 2, "The byte array is too short.");
-                    let addr = u16::from_be_bytes([bytes[0], bytes[1]]);
+                    let addr = u16::from_le_bytes([bytes[0], bytes[1]]);
                     Ok((Displacement::NoneDirect(addr), &bytes[2..]))
                 } else {
                     Ok((Displacement::None, bytes))
@@ -31,7 +31,7 @@ impl Displacement {
             }
             Mode::Memory16 => {
                 assert!(bytes.len() >= 2, "The byte array is too short.");
-                let addr = u16::from_be_bytes([bytes[0], bytes[1]]);
+                let addr = i16::from_le_bytes([bytes[0], bytes[1]]);
                 Ok((Displacement::Word(addr), &bytes[2..]))
             }
             Mode::Register => Err(DecodeError::Displacement),
@@ -42,7 +42,8 @@ impl Displacement {
 impl fmt::Display for Displacement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::NoneDirect(val) | Self::Word(val) => write!(f, " + {val}"),
+            Self::NoneDirect(val) => write!(f, " + {val}"),
+            Self::Word(val) => write!(f, " + {val}"),
             Self::Byte(val) => write!(f, " + {val}"),
             Self::None => write!(f, ""),
         }
@@ -177,18 +178,19 @@ mod tests {
     #[test]
     fn test_with_memory16_success() {
         assert_eq!(
-            EffectiveAddr::new(0b110, Displacement::Word(0xFF)),
+            EffectiveAddr::new(0b110, Displacement::Word(0xFF as i16)),
             EffectiveAddr::RegDisp {
                 base: Register::BP,
-                disp: Displacement::Word(0xFF)
+                disp: Displacement::Word(0xFF as i16)
             }
         );
 
+        let val = i16::from_le_bytes([0xFF, 0xFF]);
         assert_eq!(
-            EffectiveAddr::new(0b110, Displacement::Word(0xFFFF)),
+            EffectiveAddr::new(0b110, Displacement::Word(val)),
             EffectiveAddr::RegDisp {
                 base: Register::BP,
-                disp: Displacement::Word(0xFFFF)
+                disp: Displacement::Word(val)
             }
         );
     }

@@ -33,11 +33,10 @@ impl Instruction {
                 Ok((Instruction::Mov(op), rest))
             }
             MovMemAcc => {
-                todo!()
+                let (op, rest) = MovOp::try_decode_mem_acc(bytes)?;
+                Ok((Instruction::Mov(op), rest))
             }
-            MovAccMem => todo!(),
-            MovRMSegReg => todo!(),
-            MovSegRegRM => todo!(),
+            MovRMSegReg | MovSegRegRM => todo!(),
             NumImRM => {
                 let (op, rest) = NumOp::try_decode_im_rm(bytes)?;
                 Ok((Instruction::Num(op), rest))
@@ -253,7 +252,7 @@ mod tests {
             "mov bx, [bp + di]",
             "mov dx, [bp + 0]",
             "mov ah, [bx + si + 4]",
-            "mov al, [bx + si + 34579]",
+            "mov al, [bx + si + 4999]",
             "mov [bx + di], cx",
             "mov [bp + si], cl",
             "mov [bp + 0], ch",

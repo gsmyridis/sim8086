@@ -31,8 +31,7 @@ create_opcodes! {
     (MovRegRM, "100010");
     (MovImRM, "1100011");
     (MovImReg, "1011");
-    (MovMemAcc, "1010000");
-    (MovAccMem, "1010001");
+    (MovMemAcc, "101000");
     (MovRMSegReg, "10001110");
     (MovSegRegRM, "10001100");
 
