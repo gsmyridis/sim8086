@@ -10,7 +10,6 @@ pub struct MovOp {
     destination: Operand,
 }
 
-
 impl MovOp {
     /// Creates a new move operation with specified source and destination operands.
     fn new(source: Operand, destination: Operand) -> Self {
@@ -39,17 +38,19 @@ impl MovOp {
         assert_eq!((bytes[1] >> 3) & 0b111, 0b000u8);
         let rm = RM::parse_byte(bytes[1]);
 
-        let (dest, remaining) = Operand::register_or_memory(width.as_bool(), &mode, rm.as_u8(), &bytes[2..])?;
-
+        let (dest, remaining) =
+            Operand::register_or_memory(width.as_bool(), &mode, rm.as_u8(), &bytes[2..])?;
 
         match width {
             Width::Byte => {
                 let source = Operand::immediate(Value::Byte(remaining[1]));
                 Ok((MovOp::new(source, dest), &remaining[1..]))
-
-            },
+            }
             Width::Word => {
-                let source = Operand::immediate(Value::Word(u16::from_le_bytes([remaining[1], remaining[2]])));
+                let source = Operand::immediate(Value::Word(u16::from_le_bytes([
+                    remaining[1],
+                    remaining[2],
+                ])));
                 Ok((MovOp::new(source, dest), &remaining[2..]))
             }
         }
@@ -62,7 +63,7 @@ impl MovOp {
         let reg = Reg::parse_byte_low(bytes[0]);
         let value = match width {
             Width::Byte => Value::Byte(bytes[1]),
-            Width::Word => Value::Word(u16::from_le_bytes([bytes[1], bytes[2]]))
+            Width::Word => Value::Word(u16::from_le_bytes([bytes[1], bytes[2]])),
         };
 
         let source = Operand::immediate(value);

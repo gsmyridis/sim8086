@@ -1,12 +1,11 @@
+pub mod address;
 pub mod error;
 pub mod fields;
 pub mod operand;
 pub mod ops;
-pub mod address;
 
 pub mod instruct;
 pub use instruct::Instruction;
-
 
 /// Returns the bit located in position `pos` from the given byte
 /// in boolean representation.
@@ -14,7 +13,6 @@ pub use instruct::Instruction;
 pub fn get_bit(byte: u8, pos: u8) -> bool {
     (byte >> pos) & 1 == 1
 }
-
 
 #[cfg(test)]
 mod tests {

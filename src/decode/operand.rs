@@ -1,17 +1,15 @@
 use std::fmt;
 
 use super::fields::{Direction, Mode, Reg, Width, RM};
-use crate::register::Register;
 use crate::decode::address::{Displacement, EffectiveAddr};
 use crate::decode::error::DResult;
-
+use crate::register::Register;
 
 #[derive(Debug)]
 pub enum Value {
     Byte(u8),
     Word(u16),
 }
-
 
 impl fmt::Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -22,11 +20,10 @@ impl fmt::Display for Value {
     }
 }
 
-
 /// A struct representing an instruction operand.
 ///
 /// Instructions have one or two operands, each one being either, a register,
-/// a memory address or an immediate value. 
+/// a memory address or an immediate value.
 #[derive(Debug)]
 pub enum Operand {
     Register(Register),
@@ -54,11 +51,14 @@ impl Operand {
     }
 
     /// Creates a register or memory operand.
-    pub fn register_or_memory<'a>(width: bool, mode: &Mode, rm: u8, bytes: &'a[u8]) -> DResult<Self, &'a[u8]> {
+    pub fn register_or_memory<'a>(
+        width: bool,
+        mode: &Mode,
+        rm: u8,
+        bytes: &'a [u8],
+    ) -> DResult<Self, &'a [u8]> {
         match mode {
-            Mode::Register => {
-                Ok((Operand::register(rm, width), bytes))
-            },
+            Mode::Register => Ok((Operand::register(rm, width), bytes)),
             _ => {
                 let (disp, remaining) = Displacement::new(mode, rm, bytes)?;
                 Ok((Operand::memory(rm, disp), remaining))
@@ -66,7 +66,6 @@ impl Operand {
         }
     }
 }
-
 
 /// Returns the source and destination register operands.
 pub fn get_operands(
@@ -78,20 +77,20 @@ pub fn get_operands(
     bytes: &[u8],
 ) -> DResult<(Operand, Operand), &[u8]> {
     let reg_operand = Operand::register(reg.into(), width.as_bool());
-    let (rm_operand, remaining) = Operand::register_or_memory(width.as_bool(), &mode, rm.as_u8(), bytes)?;
+    let (rm_operand, remaining) =
+        Operand::register_or_memory(width.as_bool(), &mode, rm.as_u8(), bytes)?;
     match direction {
         Direction::Source => Ok(((reg_operand, rm_operand), remaining)),
         Direction::Destination => Ok(((rm_operand, reg_operand), remaining)),
     }
 }
 
-
 impl fmt::Display for Operand {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Register(reg) => write!(f, "{reg}"),
             Self::Immediate(val) => write!(f, "{val}"),
-            Self::Memory(addr) => write!(f, "{addr}")
+            Self::Memory(addr) => write!(f, "{addr}"),
         }
     }
 }

@@ -1,87 +1,167 @@
 use std::fmt;
 
 use super::error::DecodeError;
-use super::ops::{NumOp, NumOpType, MovOp, OpCode};
 use super::ops::OpCode::*;
+use super::ops::{CondJumpOp, MovOp, NumOp, NumOpType, OpCode};
 
 #[derive(Debug)]
 pub enum Instruction {
     Mov(MovOp),
     Num(NumOp),
+    Jump(CondJumpOp),
 }
 
 impl Instruction {
-
     /// Tries to decode next instruction from the binary representation of the machine code.
     ///
     /// Takes a reference to an array of bytes that represent the machine code, and attempts
-    /// to decode the next instruction. If it succeeds, it returns the instruction and a 
-    /// reference to the array with the rest of the bytes. Otherwise it returns the parsing 
+    /// to decode the next instruction. If it succeeds, it returns the instruction and a
+    /// reference to the array with the rest of the bytes. Otherwise it returns the parsing
     /// error.
     pub fn try_decode_next(bytes: &[u8]) -> Result<(Instruction, &[u8]), DecodeError> {
         match OpCode::parse(bytes[0])? {
             MovRegRM => {
                 let (op, rest) = MovOp::try_parse_reg_rm(bytes)?;
                 Ok((Instruction::Mov(op), rest))
-            },
+            }
             MovImRM => {
                 let (op, rest) = MovOp::try_parse_im_rm(bytes)?;
                 Ok((Instruction::Mov(op), rest))
-            },
+            }
             MovImReg => {
                 let (op, rest) = MovOp::try_parse_im_reg(bytes)?;
                 Ok((Instruction::Mov(op), rest))
-            },
+            }
             MovMemAcc => {
                 todo!()
-            },
+            }
             MovAccMem => todo!(),
             MovRMSegReg => todo!(),
             MovSegRegRM => todo!(),
             NumImRM => {
                 let (op, rest) = NumOp::try_decode_im_rm(bytes)?;
                 Ok((Instruction::Num(op), rest))
-            },
+            }
             AddRMReg => {
                 let (op, rest) = NumOp::try_decode_rm_reg(bytes, NumOpType::Add)?;
                 Ok((Instruction::Num(op), rest))
-            },
+            }
             AdcRMReg => {
                 let (op, rest) = NumOp::try_decode_rm_reg(bytes, NumOpType::Adc)?;
                 Ok((Instruction::Num(op), rest))
-            },
+            }
             SubRMReg => {
                 let (op, rest) = NumOp::try_decode_rm_reg(bytes, NumOpType::Sub)?;
                 Ok((Instruction::Num(op), rest))
-            },
+            }
             SbbRMReg => {
                 let (op, rest) = NumOp::try_decode_rm_reg(bytes, NumOpType::Sbb)?;
                 Ok((Instruction::Num(op), rest))
-            },
+            }
             CmpRMReg => {
                 let (op, rest) = NumOp::try_decode_rm_reg(bytes, NumOpType::Cmp)?;
                 Ok((Instruction::Num(op), rest))
-            },
+            }
             AddImAcc => {
                 let (op, rest) = NumOp::try_decode_im_acc(bytes, NumOpType::Add)?;
                 Ok((Instruction::Num(op), rest))
-            },
+            }
             AdcImAcc => {
                 let (op, rest) = NumOp::try_decode_im_acc(bytes, NumOpType::Adc)?;
                 Ok((Instruction::Num(op), rest))
-            },
+            }
             SubImAcc => {
                 let (op, rest) = NumOp::try_decode_im_acc(bytes, NumOpType::Sub)?;
                 Ok((Instruction::Num(op), rest))
-            },
+            }
             SbbImAcc => {
                 let (op, rest) = NumOp::try_decode_im_acc(bytes, NumOpType::Sbb)?;
                 Ok((Instruction::Num(op), rest))
-            },
+            }
             CmpImAcc => {
                 let (op, rest) = NumOp::try_decode_im_acc(bytes, NumOpType::Cmp)?;
                 Ok((Instruction::Num(op), rest))
-            },
+            }
+            JumpEqual => Ok((
+                Instruction::Jump(CondJumpOp::Equal(bytes[0] as i8)),
+                &bytes[2..],
+            )),
+            JumpLess => Ok((
+                Instruction::Jump(CondJumpOp::Less(bytes[0] as i8)),
+                &bytes[2..],
+            )),
+            JumpLessEq => Ok((
+                Instruction::Jump(CondJumpOp::LessEqual(bytes[0] as i8)),
+                &bytes[2..],
+            )),
+            JumpBelow => Ok((
+                Instruction::Jump(CondJumpOp::Below(bytes[0] as i8)),
+                &bytes[2..],
+            )),
+            JumpBelowEq => Ok((
+                Instruction::Jump(CondJumpOp::BelowEqual(bytes[0] as i8)),
+                &bytes[2..],
+            )),
+            JumpParityEven => Ok((
+                Instruction::Jump(CondJumpOp::ParityEven(bytes[0] as i8)),
+                &bytes[2..],
+            )),
+            JumpOverflow => Ok((
+                Instruction::Jump(CondJumpOp::Overflow(bytes[0] as i8)),
+                &bytes[2..],
+            )),
+            JumpNEqual => Ok((
+                Instruction::Jump(CondJumpOp::NotEqual(bytes[0] as i8)),
+                &bytes[2..],
+            )),
+            JumpSign => Ok((
+                Instruction::Jump(CondJumpOp::Sign(bytes[0] as i8)),
+                &bytes[2..],
+            )),
+            JumpGreaterEq => Ok((
+                Instruction::Jump(CondJumpOp::GreaterEqual(bytes[0] as i8)),
+                &bytes[2..],
+            )),
+            JumpGreater => Ok((
+                Instruction::Jump(CondJumpOp::Greater(bytes[0] as i8)),
+                &bytes[2..],
+            )),
+            JumpAboveEq => Ok((
+                Instruction::Jump(CondJumpOp::AboveEqual(bytes[0] as i8)),
+                &bytes[2..],
+            )),
+            JumpAbove => Ok((
+                Instruction::Jump(CondJumpOp::Above(bytes[0] as i8)),
+                &bytes[2..],
+            )),
+            JumpParityOdd => Ok((
+                Instruction::Jump(CondJumpOp::ParityOdd(bytes[0] as i8)),
+                &bytes[2..],
+            )),
+            JumpNOverflow => Ok((
+                Instruction::Jump(CondJumpOp::NotOverflow(bytes[0] as i8)),
+                &bytes[2..],
+            )),
+            JumpNSign => Ok((
+                Instruction::Jump(CondJumpOp::NotSign(bytes[0] as i8)),
+                &bytes[2..],
+            )),
+            Loop => Ok((
+                Instruction::Jump(CondJumpOp::Loop(bytes[0] as i8)),
+                &bytes[2..]
+            )),
+            LoopEqual => Ok((
+                Instruction::Jump(CondJumpOp::LoopEqual(bytes[0] as i8)),
+                &bytes[2..]
+            )),
+            LoopNequal => Ok((
+                Instruction::Jump(CondJumpOp::LoopNEqual(bytes[0] as i8)),
+                &bytes[2..]
+            )),
+            JumpCXZero => Ok((
+                Instruction::Jump(CondJumpOp::CXZero(bytes[0] as i8)),
+                &bytes[2..]
+            )),
         }
     }
 
@@ -95,23 +175,22 @@ impl Instruction {
         while !bytes_.is_empty() {
             let (instr, rest) = Self::try_decode_next(bytes_)?;
             bytes_ = rest;
-            println!("{}", instr);
+            println!("{instr}");
             instructions.push(instr);
         }
         Ok(instructions)
     }
 }
 
-
 impl fmt::Display for Instruction {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Mov(op) => write!(f, "{op}"),
             Self::Num(op) => write!(f, "{op}"),
+            Self::Jump(op) => write!(f, "{op}"),
         }
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -129,9 +208,8 @@ mod tests {
     #[test]
     fn multi_mov_reg_reg() {
         let bin = &[
-            0x89, 0xd9, 0x88, 0xe5, 0x89, 0xda, 0x89, 0xde, 
-            0x89, 0xfb, 0x88, 0xc8, 0x88, 0xed, 0x89, 0xc3, 
-            0x89, 0xf3, 0x89, 0xfc, 0x89, 0xc5,
+            0x89, 0xd9, 0x88, 0xe5, 0x89, 0xda, 0x89, 0xde, 0x89, 0xfb, 0x88, 0xc8, 0x88, 0xed,
+            0x89, 0xc3, 0x89, 0xf3, 0x89, 0xfc, 0x89, 0xc5,
         ];
 
         let asm = &[
@@ -156,14 +234,10 @@ mod tests {
 
     #[test]
     fn multi_mov_all() {
-
         let bin = &[
-            0x89, 0xde, 0x88, 0xc6, 0xb1, 0x0c, 0xb5, 0xf4, 
-            0xb9, 0x0c, 0x00, 0xb9, 0xf4, 0xff, 0xba, 0x6c,
-            0x0f, 0xba, 0x94, 0xf0, 0x8a, 0x00, 0x8b, 0x1b,
-            0x8b, 0x56, 0x00, 0x8a, 0x60, 0x04, 0x8a, 0x80,
-            0x87, 0x13, 0x89, 0x09, 0x88, 0x0a, 0x88, 0x6e,
-            0x00,
+            0x89, 0xde, 0x88, 0xc6, 0xb1, 0x0c, 0xb5, 0xf4, 0xb9, 0x0c, 0x00, 0xb9, 0xf4, 0xff,
+            0xba, 0x6c, 0x0f, 0xba, 0x94, 0xf0, 0x8a, 0x00, 0x8b, 0x1b, 0x8b, 0x56, 0x00, 0x8a,
+            0x60, 0x04, 0x8a, 0x80, 0x87, 0x13, 0x89, 0x09, 0x88, 0x0a, 0x88, 0x6e, 0x00,
         ];
 
         let asm = &[

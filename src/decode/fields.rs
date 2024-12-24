@@ -1,5 +1,5 @@
-use crate::decode::error::DecodeError;
 use super::get_bit;
+use crate::decode::error::DecodeError;
 
 /// `Width` is an enum that represents the `W` field.
 ///
@@ -10,9 +10,9 @@ pub enum Width {
     Byte,
     Word,
 }
- 
+
 impl Width {
-    /// Parses a byte and extracts the width field from the least 
+    /// Parses a byte and extracts the width field from the least
     /// significant bit.
     #[inline]
     pub fn parse_byte(byte: u8, pos: u8) -> Self {
@@ -39,7 +39,6 @@ impl Width {
         self.as_bool() as usize + 1
     }
 }
-
 
 /// `Direction` is an enum that represents the `D` field.
 ///
@@ -73,7 +72,6 @@ impl From<bool> for Direction {
     }
 }
 
-
 /// `Sign` is an enum representing the `S` field.
 ///
 /// The `S` field is use in conjunction with the `W` field to indicate
@@ -93,13 +91,12 @@ impl Sign {
 
     pub fn extend_sign(byte: u8) -> u16 {
         if byte > 0b10000000 {
-            u16::from_le_bytes([0xFF, byte]) 
+            u16::from_le_bytes([0xFF, byte])
         } else {
             byte as u16
         }
     }
 }
-
 
 impl From<bool> for Sign {
     #[inline]
@@ -110,8 +107,6 @@ impl From<bool> for Sign {
         }
     }
 }
-
-
 
 /// `Mode` is a struct that represents the `MOD` fields.
 ///
@@ -186,7 +181,6 @@ impl From<Reg> for u8 {
 /// operand is to be calculated.
 #[derive(Debug)]
 pub struct RM(u8);
-
 
 impl RM {
     /// Parses a byte and extracts the R/M fields.
