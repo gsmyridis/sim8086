@@ -1,17 +1,24 @@
 use std::fs;
 use std::io::prelude::*;
 
+use clap::Parser;
+
+mod register;
 mod decode;
 use decode::error::DecodeError;
 
-mod register;
-
 use decode::Instruction;
 
-const BIN_PATH: &str = "../computer_enhance/perfaware/part1/listing_0042_completionist_decode";
+
+#[derive(Parser)]
+struct Cli {
+    path: String,
+}
 
 fn main() -> Result<(), DecodeError> {
-    let mut file = fs::File::open(BIN_PATH).expect("Failed to open file");
+
+    let cli = Cli::parse();
+    let mut file = fs::File::open(cli.path).expect("Failed to open file");
     let mut buffer = Vec::new();
     file.read_to_end(&mut buffer)
         .expect("Failed to read bytes from file.");
