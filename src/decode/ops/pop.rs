@@ -7,12 +7,12 @@ use crate::register::{Register, SegmentRegister};
 
 
 #[derive(Debug)]
-pub struct PushOp {
+pub struct PopOp {
     source: Operand
 }
 
 
-impl PushOp {
+impl PopOp {
 
     pub fn try_decode_rm(bytes: &[u8]) -> DResult<Self, &[u8]> {
         let mode = Mode::try_parse_byte(bytes[1])?;
@@ -37,12 +37,12 @@ impl PushOp {
 }
 
 
-impl fmt::Display for PushOp {
+impl fmt::Display for PopOp {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match &self.source {
-            Operand::Memory(addr) => write!(f, "push word {addr}"),
-            Operand::Register(reg) => write!(f, "push {reg}"),
-            Operand::SegmentRegister(segreg) => write!(f, "push {segreg}"),
+            Operand::Memory(addr) => write!(f, "pop word {addr}"),
+            Operand::Register(reg) => write!(f, "pop {reg}"),
+            Operand::SegmentRegister(segreg) => write!(f, "pop {segreg}"),
             Operand::Immediate(_) => panic!("Pushed value cannot be immediate")
         }
     }

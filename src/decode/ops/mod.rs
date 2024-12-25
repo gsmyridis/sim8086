@@ -7,6 +7,9 @@ pub use mov::MovOp;
 pub mod push;
 pub use push::PushOp;
 
+pub mod pop;
+pub use pop::PopOp;
+
 pub mod num;
 pub use num::{NumOp, NumOpType};
 

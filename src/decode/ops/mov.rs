@@ -48,13 +48,13 @@ impl MovOp {
 
         match width {
             Width::Byte => {
-                let source = Operand::immediate(Value::Byte(remaining[1]));
+                let source = Operand::immediate(Value::Byte(remaining[0]));
                 Ok((MovOp::new(source, dest), &remaining[1..]))
             }
             Width::Word => {
                 let source = Operand::immediate(Value::Word(u16::from_le_bytes([
+                    remaining[0],
                     remaining[1],
-                    remaining[2],
                 ])));
                 Ok((MovOp::new(source, dest), &remaining[2..]))
             }
@@ -94,6 +94,15 @@ impl MovOp {
 
 impl fmt::Display for MovOp {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(&format!("mov {}, {}", self.destination, self.source))
+        let prefix = match (&self.source, &self.destination) {
+            (Operand::Immediate(Value::Byte(_)), Operand::Memory(_)) => {
+                "byte "
+            },
+            (Operand::Immediate(Value::Word(_)), Operand::Memory(_)) => {
+                "word "
+            },
+            _ => ""
+        };
+        f.write_str(&format!("mov {}, {}{}", self.destination, prefix, self.source))
     }
 }

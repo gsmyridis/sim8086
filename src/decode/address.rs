@@ -4,6 +4,7 @@ use super::fields::Mode;
 use crate::decode::error::DecodeError;
 use crate::register::Register;
 
+
 #[derive(Debug, PartialEq)]
 pub enum Displacement {
     None,
@@ -18,7 +19,6 @@ impl Displacement {
         match mode {
             Mode::Memory => {
                 if rm == 0b110 {
-                    assert!(bytes.len() >= 2, "The byte array is too short.");
                     let addr = u16::from_le_bytes([bytes[0], bytes[1]]);
                     Ok((Displacement::NoneDirect(addr), &bytes[2..]))
                 } else {
@@ -26,11 +26,9 @@ impl Displacement {
                 }
             }
             Mode::Memory8 => {
-                assert!(!bytes.is_empty(), "The byte array is too short.");
                 Ok((Displacement::Byte(bytes[0]), &bytes[1..]))
             }
             Mode::Memory16 => {
-                assert!(bytes.len() >= 2, "The byte array is too short.");
                 let addr = i16::from_le_bytes([bytes[0], bytes[1]]);
                 Ok((Displacement::Word(addr), &bytes[2..]))
             }
@@ -39,12 +37,26 @@ impl Displacement {
     }
 }
 
+
 impl fmt::Display for Displacement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::NoneDirect(val) => write!(f, " + {val}"),
-            Self::Word(val) => write!(f, " + {val}"),
-            Self::Byte(val) => write!(f, " + {val}"),
+            Self::Word(val) => {
+                if *val < 0 {
+                    write!(f, " - {}", -val)
+                } else {
+                    write!(f, " + {val}")
+                }
+            },
+            Self::Byte(val) => {
+                let val = (*val as i8) as i16;
+                if val < 0 {
+                    write!(f, " - {}", -val)
+                } else {
+                    write!(f, " + {val}")
+                }
+            },
             Self::None => write!(f, ""),
         }
     }

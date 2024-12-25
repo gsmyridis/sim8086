@@ -74,8 +74,10 @@ create_opcodes! {
     (LoopEqual, "11100001");        // Loop while Equal / Zero
     (LoopNequal, "11100000");       // Loop while Not Equal / Zero
 
-    // Push Ops
+    // Push Pop Ops
     (PushRegRM, "11111111");
     (PushReg, "01010");
-    (PushSegReg, "000");
+    (PopRegRM, "10001111");
+    (PopReg, "01011");
+    (PushPopSeg, "000");
 }

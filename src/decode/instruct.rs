@@ -2,11 +2,13 @@ use std::fmt;
 
 use super::error::DecodeError;
 use super::ops::OpCode::*;
-use super::ops::{CondJumpOp, MovOp, NumOp, NumOpType, OpCode, PushOp};
+use super::ops::{CondJumpOp, MovOp, NumOp, NumOpType, OpCode, PushOp, PopOp};
 
 #[derive(Debug)]
 pub enum Instruction {
-    Mov(MovOp), Push(PushOp),
+    Mov(MovOp), 
+    Push(PushOp),
+    Pop(PopOp),
     Num(NumOp),
     Jump(CondJumpOp),
 }
@@ -169,9 +171,26 @@ impl Instruction {
                 let (op, rest) = PushOp::try_decode_reg(bytes)?;
                 Ok((Instruction::Push(op), rest))
             },
-            PushSegReg => {
-                let (op, rest) = PushOp::try_decode_seg_reg(bytes)?;
-                Ok((Instruction::Push(op), rest))
+            PopRegRM => {
+                let (op, rest) = PopOp::try_decode_rm(bytes)?;
+                Ok((Instruction::Pop(op), rest))
+            }
+            PopReg => {
+                let (op, rest) = PopOp::try_decode_reg(bytes)?;
+                Ok((Instruction::Pop(op), rest))
+            },
+            PushPopSeg => {
+                match bytes[0] & 0b111 {
+                    0b110 => {
+                        let (op, rest) = PushOp::try_decode_seg_reg(bytes)?;
+                        Ok((Instruction::Push(op), rest))
+                    },
+                    0b111 => {
+                        let (op, rest) = PopOp::try_decode_seg_reg(bytes)?;
+                        Ok((Instruction::Pop(op), rest))
+                    },
+                    _ => Err(DecodeError::OpCode(format!("{}", bytes[0])))
+                }
             }
         }
     }
@@ -198,6 +217,7 @@ impl fmt::Display for Instruction {
         match self {
             Self::Mov(op) => write!(f, "{op}"),
             Self::Push(op) => write!(f, "{op}"),
+            Self::Pop(op) => write!(f, "{op}"),
             Self::Num(op) => write!(f, "{op}"),
             Self::Jump(op) => write!(f, "{op}"),
         }
