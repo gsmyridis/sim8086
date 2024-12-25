@@ -1,5 +1,7 @@
 use std::fmt;
 
+
+
 #[derive(Debug, PartialEq)]
 pub enum Register {
     AL, // Low byte of A register.
@@ -83,6 +85,45 @@ impl fmt::Display for Register {
         }
     }
 }
+
+
+#[derive(Debug)]
+pub enum SegmentRegister {
+    ES,  // Extra Segment
+    CS,  // Code Segment
+    SS,  // Stack Segment
+    DS,  // Data Segment
+}
+
+
+impl TryFrom<u8> for SegmentRegister {
+    type Error = &'static str;
+
+    fn try_from(byte: u8) -> Result<Self, Self::Error> {
+        match byte {
+            0b00 => Ok(Self::ES),
+            0b01 => Ok(Self::CS),
+            0b10 => Ok(Self::SS),
+            0b11 => Ok(Self::DS),
+            _ => Err("Invalid segment register code.")
+        }
+    }
+}
+
+
+impl fmt::Display for SegmentRegister {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let string = match self {
+            Self::ES => "es",
+            Self::CS => "cs",
+            Self::SS => "ss",
+            Self::DS => "ds",
+        };
+        write!(f, "{string}")
+    }
+}
+
+
 
 #[cfg(test)]
 mod tests {

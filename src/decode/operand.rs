@@ -3,7 +3,7 @@ use std::fmt;
 use super::fields::{Direction, Mode, Reg, Width, RM};
 use crate::decode::address::{Displacement, EffectiveAddr};
 use crate::decode::error::DResult;
-use crate::register::Register;
+use crate::register::{Register, SegmentRegister};
 
 #[derive(Debug)]
 pub enum Value {
@@ -27,6 +27,7 @@ impl fmt::Display for Value {
 #[derive(Debug)]
 pub enum Operand {
     Register(Register),
+    SegmentRegister(SegmentRegister),
     Memory(EffectiveAddr),
     Immediate(Value),
 }
@@ -89,6 +90,7 @@ impl fmt::Display for Operand {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Register(reg) => write!(f, "{reg}"),
+            Self::SegmentRegister(segreg) => write!(f, "{segreg}"),
             Self::Immediate(val) => write!(f, "{val}"),
             Self::Memory(addr) => write!(f, "{addr}"),
         }

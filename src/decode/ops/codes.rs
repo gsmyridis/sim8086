@@ -69,8 +69,13 @@ create_opcodes! {
     (JumpNSign, "01111001");        // Jump on Not Sign
     (JumpCXZero, "11100011");       // Jump on CX Zero
 
-    // LoopOps
+    // Loop Ops
     (Loop, "11100010");             // Loop CX times
     (LoopEqual, "11100001");        // Loop while Equal / Zero
     (LoopNequal, "11100000");       // Loop while Not Equal / Zero
+
+    // Push Ops
+    (PushRegRM, "11111111");
+    (PushReg, "01010");
+    (PushSegReg, "000");
 }

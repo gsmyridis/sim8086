@@ -2,11 +2,11 @@ use std::fmt;
 
 use super::error::DecodeError;
 use super::ops::OpCode::*;
-use super::ops::{CondJumpOp, MovOp, NumOp, NumOpType, OpCode};
+use super::ops::{CondJumpOp, MovOp, NumOp, NumOpType, OpCode, PushOp};
 
 #[derive(Debug)]
 pub enum Instruction {
-    Mov(MovOp),
+    Mov(MovOp), Push(PushOp),
     Num(NumOp),
     Jump(CondJumpOp),
 }
@@ -161,6 +161,18 @@ impl Instruction {
                 Instruction::Jump(CondJumpOp::CXZero(bytes[0] as i8)),
                 &bytes[2..]
             )),
+            PushRegRM => {
+                let (op, rest) = PushOp::try_decode_rm(bytes)?;
+                Ok((Instruction::Push(op), rest))
+            },
+            PushReg => {
+                let (op, rest) = PushOp::try_decode_reg(bytes)?;
+                Ok((Instruction::Push(op), rest))
+            },
+            PushSegReg => {
+                let (op, rest) = PushOp::try_decode_seg_reg(bytes)?;
+                Ok((Instruction::Push(op), rest))
+            }
         }
     }
 
@@ -185,6 +197,7 @@ impl fmt::Display for Instruction {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Mov(op) => write!(f, "{op}"),
+            Self::Push(op) => write!(f, "{op}"),
             Self::Num(op) => write!(f, "{op}"),
             Self::Jump(op) => write!(f, "{op}"),
         }

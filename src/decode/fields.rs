@@ -173,6 +173,25 @@ impl From<Reg> for u8 {
     }
 }
 
+
+#[derive(Debug)]
+pub struct SR(u8);
+
+impl SR {
+    /// Parses a byte and extracts the SR fields from the 3rd and 4th
+    /// least significant bits.
+    #[inline]
+    pub fn parse_byte(byte: u8) -> Self {
+        Self((byte >> 3) & 0b11)
+    }
+
+    #[inline]
+    pub fn as_u8(&self) -> u8 {
+        self.0
+    }
+}
+
+
 /// `RM` is a struct that represents the `R/M` fields.
 ///
 /// The encoding of the `R/M` (register/memory) field depends on
