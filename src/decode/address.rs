@@ -179,10 +179,10 @@ mod tests {
     #[test]
     fn test_with_memory_mode8_success() {
         assert_eq!(
-            EffectiveAddr::new(0b110, Displacement::Byte(0xFF)),
+            EffectiveAddr::new(0b110, Displacement::Byte(0xFFu8 as i8)),
             EffectiveAddr::RegDisp {
                 base: Register::BP,
-                disp: Displacement::Byte(0xFF)
+                disp: Displacement::Byte(0xFFu8 as i8)
             }
         );
     }
