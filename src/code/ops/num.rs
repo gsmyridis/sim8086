@@ -1,8 +1,8 @@
 use std::fmt;
 
-use crate::decode::fields::*;
-use crate::decode::operand::{get_operands, get_prefix, Operand, Value};
-use crate::decode::{DResult, DecodeError, Register};
+use crate::code::fields::*;
+use crate::code::operand::{get_operands, get_prefix, Operand, Value};
+use crate::code::{DResult, DecodeError, Register};
 
 pub enum NumOpType {
     Add = 0b000,

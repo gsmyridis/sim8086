@@ -1,7 +1,7 @@
 use std::fmt;
 
-use crate::decode::fields::*;
-use crate::decode::{get_bit, get_operands, DResult, EffectiveAddr, Operand, Register, Value};
+use crate::code::fields::*;
+use crate::code::{get_bit, get_operands, DResult, EffectiveAddr, Operand, Register, Value};
 
 #[derive(Debug)]
 pub struct MovOp {

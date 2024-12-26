@@ -3,8 +3,8 @@ use std::io::prelude::*;
 
 use clap::Parser;
 
-mod decode;
-use decode::{DecodeError, Instruction};
+mod code;
+use code::{DecodeError, Instruction};
 
 #[derive(Parser)]
 struct Cli {

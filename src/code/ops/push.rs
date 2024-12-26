@@ -1,6 +1,6 @@
 use std::fmt;
 
-use crate::decode::{DResult, Mode, Operand, Reg, Register, SegmentRegister, RM, SR};
+use crate::code::{DResult, Mode, Operand, Reg, Register, SegmentRegister, RM, SR};
 
 #[derive(Debug)]
 pub struct PushOp {
