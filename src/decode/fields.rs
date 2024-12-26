@@ -1,5 +1,4 @@
-use super::get_bit;
-use crate::decode::error::DecodeError;
+use super::{get_bit, DecodeError};
 
 /// `Width` is an enum that represents the `W` field.
 ///
@@ -165,7 +164,6 @@ impl From<Reg> for u8 {
     }
 }
 
-
 #[derive(Debug)]
 pub struct SR(u8);
 
@@ -182,7 +180,6 @@ impl SR {
         self.0
     }
 }
-
 
 /// `RM` is a struct that represents the `R/M` fields.
 ///
@@ -223,10 +220,10 @@ mod tests {
     #[test]
     fn test_parse_width() {
         let byte = 0b10101010;
-        assert_eq!(Width::parse_byte(byte, 0).as_bool(), false);
-        assert_eq!(Width::parse_byte(byte, 1).as_bool(), true);
-        assert_eq!(Width::parse_byte(byte, 2).as_bool(), false);
-        assert_eq!(Width::parse_byte(byte, 3).as_bool(), true);
+        assert!(!Width::parse_byte(byte, 0).as_bool());
+        assert!(Width::parse_byte(byte, 1).as_bool());
+        assert!(!Width::parse_byte(byte, 2).as_bool());
+        assert!(Width::parse_byte(byte, 3).as_bool());
     }
 
     #[test]

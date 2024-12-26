@@ -1,12 +1,12 @@
 use std::fmt;
 
-use super::error::DecodeError;
 use super::ops::OpCode::*;
-use super::ops::{CondJumpOp, MovOp, NumOp, NumOpType, OpCode, PushOp, PopOp};
+use super::ops::*;
+use super::DecodeError;
 
 #[derive(Debug)]
 pub enum Instruction {
-    Mov(MovOp), 
+    Mov(MovOp),
     Push(PushOp),
     Pop(PopOp),
     Num(NumOp),
@@ -18,7 +18,7 @@ impl Instruction {
     ///
     /// Takes a reference to an array of bytes that represent the machine code, and attempts
     /// to decode the next instruction. If it succeeds, it returns the instruction and a
-    /// reference to the array with the rest of the bytes. Otherwise it returns the parsing
+    /// reference to the array with the rest of the bytes. Otherwise, it returns the parsing
     /// error.
     pub fn try_decode_next(bytes: &[u8]) -> Result<(Instruction, &[u8]), DecodeError> {
         match OpCode::parse(bytes[0])? {
@@ -149,28 +149,28 @@ impl Instruction {
             )),
             Loop => Ok((
                 Instruction::Jump(CondJumpOp::Loop(bytes[1] as i8)),
-                &bytes[2..]
+                &bytes[2..],
             )),
             LoopEqual => Ok((
                 Instruction::Jump(CondJumpOp::LoopEqual(bytes[1] as i8)),
-                &bytes[2..]
+                &bytes[2..],
             )),
             LoopNequal => Ok((
                 Instruction::Jump(CondJumpOp::LoopNEqual(bytes[1] as i8)),
-                &bytes[2..]
+                &bytes[2..],
             )),
             JumpCXZero => Ok((
                 Instruction::Jump(CondJumpOp::CXZero(bytes[1] as i8)),
-                &bytes[2..]
+                &bytes[2..],
             )),
             PushRegRM => {
                 let (op, rest) = PushOp::try_decode_rm(bytes)?;
                 Ok((Instruction::Push(op), rest))
-            },
+            }
             PushReg => {
                 let (op, rest) = PushOp::try_decode_reg(bytes)?;
                 Ok((Instruction::Push(op), rest))
-            },
+            }
             PopRegRM => {
                 let (op, rest) = PopOp::try_decode_rm(bytes)?;
                 Ok((Instruction::Pop(op), rest))
@@ -178,20 +178,18 @@ impl Instruction {
             PopReg => {
                 let (op, rest) = PopOp::try_decode_reg(bytes)?;
                 Ok((Instruction::Pop(op), rest))
-            },
-            PushPopSeg => {
-                match bytes[0] & 0b111 {
-                    0b110 => {
-                        let (op, rest) = PushOp::try_decode_seg_reg(bytes)?;
-                        Ok((Instruction::Push(op), rest))
-                    },
-                    0b111 => {
-                        let (op, rest) = PopOp::try_decode_seg_reg(bytes)?;
-                        Ok((Instruction::Pop(op), rest))
-                    },
-                    _ => Err(DecodeError::OpCode(format!("{}", bytes[0])))
-                }
             }
+            PushPopSeg => match bytes[0] & 0b111 {
+                0b110 => {
+                    let (op, rest) = PushOp::try_decode_seg_reg(bytes)?;
+                    Ok((Instruction::Push(op), rest))
+                }
+                0b111 => {
+                    let (op, rest) = PopOp::try_decode_seg_reg(bytes)?;
+                    Ok((Instruction::Pop(op), rest))
+                }
+                _ => Err(DecodeError::OpCode(format!("{}", bytes[0]))),
+            },
         }
     }
 

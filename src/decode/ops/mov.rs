@@ -1,19 +1,13 @@
 use std::fmt;
 
-use crate::register::Register;
-use crate::decode::get_bit;
-use crate::decode::address::EffectiveAddr;
-use crate::decode::error::DResult;
 use crate::decode::fields::*;
-use crate::decode::operand::{get_operands, Operand, Value};
-
+use crate::decode::{get_bit, get_operands, DResult, EffectiveAddr, Operand, Register, Value};
 
 #[derive(Debug)]
 pub struct MovOp {
     source: Operand,
     destination: Operand,
 }
-
 
 impl MovOp {
     /// Creates a new move operation with specified source and destination operands.
@@ -95,14 +89,13 @@ impl MovOp {
 impl fmt::Display for MovOp {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let prefix = match (&self.source, &self.destination) {
-            (Operand::Immediate(Value::Byte(_)), Operand::Memory(_)) => {
-                "byte "
-            },
-            (Operand::Immediate(Value::Word(_)), Operand::Memory(_)) => {
-                "word "
-            },
-            _ => ""
+            (Operand::Immediate(Value::Byte(_)), Operand::Memory(_)) => "byte ",
+            (Operand::Immediate(Value::Word(_)), Operand::Memory(_)) => "word ",
+            _ => "",
         };
-        f.write_str(&format!("mov {}, {}{}", self.destination, prefix, self.source))
+        f.write_str(&format!(
+            "mov {}, {}{}",
+            self.destination, prefix, self.source
+        ))
     }
 }

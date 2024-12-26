@@ -1,4 +1,4 @@
-use crate::decode::error::DecodeError;
+use crate::decode::DecodeError;
 
 macro_rules! create_opcodes {
     (

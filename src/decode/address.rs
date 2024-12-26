@@ -1,9 +1,6 @@
 use std::fmt;
 
-use super::fields::Mode;
-use crate::decode::error::DecodeError;
-use crate::register::Register;
-
+use super::{DecodeError, Mode, Register};
 
 #[derive(Debug, PartialEq)]
 pub enum Displacement {
@@ -25,9 +22,7 @@ impl Displacement {
                     Ok((Displacement::None, bytes))
                 }
             }
-            Mode::Memory8 => {
-                Ok((Displacement::Byte(bytes[0] as i8), &bytes[1..]))
-            }
+            Mode::Memory8 => Ok((Displacement::Byte(bytes[0] as i8), &bytes[1..])),
             Mode::Memory16 => {
                 let addr = i16::from_le_bytes([bytes[0], bytes[1]]);
                 Ok((Displacement::Word(addr), &bytes[2..]))
@@ -36,7 +31,6 @@ impl Displacement {
         }
     }
 }
-
 
 impl fmt::Display for Displacement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -48,15 +42,15 @@ impl fmt::Display for Displacement {
                 } else {
                     write!(f, " + {val}")
                 }
-            },
+            }
             Self::Byte(val) => {
-                let val = (*val as i8) as i16;
+                let val = *val as i16;
                 if val < 0 {
                     write!(f, " - {}", -val)
                 } else {
                     write!(f, " + {val}")
                 }
-            },
+            }
             Self::None => write!(f, ""),
         }
     }
@@ -190,10 +184,10 @@ mod tests {
     #[test]
     fn test_with_memory16_success() {
         assert_eq!(
-            EffectiveAddr::new(0b110, Displacement::Word(0xFF as i16)),
+            EffectiveAddr::new(0b110, Displacement::Word(0xFFi16)),
             EffectiveAddr::RegDisp {
                 base: Register::BP,
-                disp: Displacement::Word(0xFF as i16)
+                disp: Displacement::Word(0xFFi16)
             }
         );
 

@@ -1,9 +1,8 @@
 use std::fmt;
 
-use crate::decode::error::{DResult, DecodeError};
-use crate::decode::fields::{Direction, Mode, Reg, Sign, Width, RM};
-use crate::decode::operand::{get_operands, Operand, Value, get_prefix};
-use crate::register::Register;
+use crate::decode::fields::*;
+use crate::decode::operand::{get_operands, get_prefix, Operand, Value};
+use crate::decode::{DResult, DecodeError, Register};
 
 pub enum NumOpType {
     Add = 0b000,
@@ -89,7 +88,7 @@ impl NumOp {
         Ok((Self::new(source, dest, optype), rest))
     }
 
-    /// Tries to decode a Immediate - Register/Memory arithmetic operation.
+    /// Tries to decode an Immediate - Register/Memory arithmetic operation.
     /// These include ADD, ADC, SUB, SBB, and CMP.
     pub fn try_decode_im_rm(bytes: &[u8]) -> DResult<Self, &[u8]> {
         let width = Width::parse_byte(bytes[0], 0);
@@ -145,44 +144,42 @@ impl NumOp {
 
 impl fmt::Display for NumOp {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-
         match self {
             Self::Add {
                 source,
                 destination,
             } => {
-                let prefix = get_prefix(&source, &destination);
+                let prefix = get_prefix(source, destination);
                 write!(f, "add {prefix}{destination}, {source}")
-            },
+            }
             Self::Adc {
                 source,
                 destination,
             } => {
-                let prefix = get_prefix(&source, &destination);
+                let prefix = get_prefix(source, destination);
                 write!(f, "adc {prefix}{destination}, {source}")
-            },
+            }
             Self::Sub {
                 source,
                 destination,
             } => {
-                let prefix = get_prefix(&source, &destination);
+                let prefix = get_prefix(source, destination);
                 write!(f, "sub {prefix}{destination}, {source}")
-            },
+            }
             Self::Sbb {
                 source,
                 destination,
             } => {
-                let prefix = get_prefix(&source, &destination);
+                let prefix = get_prefix(source, destination);
                 write!(f, "sbb {prefix}{destination}, {source}")
-            },
+            }
             Self::Cmp {
                 source,
                 destination,
             } => {
-                let prefix = get_prefix(&source, &destination);
+                let prefix = get_prefix(source, destination);
                 write!(f, "cmp {prefix}{destination}, {source}")
-            },
+            }
         }
     }
 }
-

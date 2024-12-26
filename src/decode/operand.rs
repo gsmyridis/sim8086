@@ -1,9 +1,9 @@
 use std::fmt;
 
-use super::fields::{Direction, Mode, Reg, Width, RM};
-use crate::decode::address::{Displacement, EffectiveAddr};
-use crate::decode::error::DResult;
-use crate::register::{Register, SegmentRegister};
+use super::{
+    DResult, Direction, Displacement, EffectiveAddr, Mode, Reg, Register, SegmentRegister, Width,
+    RM,
+};
 
 #[derive(Debug)]
 pub enum Value {
@@ -97,17 +97,16 @@ impl fmt::Display for Operand {
     }
 }
 
-
 pub fn get_prefix<'a>(source: &'a Operand, dest: &'a Operand) -> &'a str {
     match (source, dest) {
         (Operand::Immediate(Value::Byte(_)), Operand::Memory(_)) => "byte ",
-        (Operand::Immediate(Value::Word(val)), Operand::Memory(_))=> {
+        (Operand::Immediate(Value::Word(val)), Operand::Memory(_)) => {
             if *val <= u8::MAX as u16 {
                 "word "
             } else {
                 ""
             }
-        },
+        }
         _ => "",
     }
 }

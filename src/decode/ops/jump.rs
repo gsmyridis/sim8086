@@ -1,6 +1,5 @@
 use std::fmt;
 
-
 macro_rules! create_cond_jump_ops {
     (
         $(
@@ -22,7 +21,6 @@ macro_rules! create_cond_jump_ops {
         }
     }
 }
-
 
 create_cond_jump_ops! {
     (Equal, "je");
@@ -47,14 +45,11 @@ create_cond_jump_ops! {
     (LoopNEqual, "loopnz");
 }
 
-
 fn get_increment(w: &mut fmt::Formatter<'_>, mnemonic: &str, inc: i8) -> fmt::Result {
-    if inc + 2 > 0 {
-        write!(w, "{} $+{}+0", mnemonic, inc + 2)?
-    } else if inc + 2 == 0 {
-        write!(w, "{} $+0", mnemonic)?
-    } else {
-        write!(w, "{} ${}+0", mnemonic, inc + 2)?
+    match inc + 2 {
+        0 => write!(w, "{} $+0", mnemonic)?,
+        (1..) => write!(w, "{} $+{}+0", mnemonic, inc + 2)?,
+        _ => write!(w, "{} ${}+0", mnemonic, inc + 2)?
     }
     Ok(())
 }

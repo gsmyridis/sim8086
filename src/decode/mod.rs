@@ -1,7 +1,18 @@
-pub mod address;
 pub mod error;
+pub use error::{DResult, DecodeError};
+
+pub mod address;
+pub use address::{Displacement, EffectiveAddr};
+
+pub mod register;
+pub use register::{Register, SegmentRegister};
+
 pub mod fields;
+pub use fields::*;
+
 pub mod operand;
+pub use operand::{get_operands, Operand, Value};
+
 pub mod ops;
 
 pub mod instruct;

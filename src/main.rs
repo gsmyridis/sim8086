@@ -3,12 +3,8 @@ use std::io::prelude::*;
 
 use clap::Parser;
 
-mod register;
 mod decode;
-use decode::error::DecodeError;
-
-use decode::Instruction;
-
+use decode::{DecodeError, Instruction};
 
 #[derive(Parser)]
 struct Cli {
@@ -16,7 +12,6 @@ struct Cli {
 }
 
 fn main() -> Result<(), DecodeError> {
-
     let cli = Cli::parse();
     let mut file = fs::File::open(cli.path).expect("Failed to open file");
     let mut buffer = Vec::new();

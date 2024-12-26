@@ -1,7 +1,5 @@
 use std::fmt;
 
-
-
 #[derive(Debug, PartialEq)]
 pub enum Register {
     AL, // Low byte of A register.
@@ -86,15 +84,13 @@ impl fmt::Display for Register {
     }
 }
 
-
 #[derive(Debug)]
 pub enum SegmentRegister {
-    ES,  // Extra Segment
-    CS,  // Code Segment
-    SS,  // Stack Segment
-    DS,  // Data Segment
+    ES, // Extra Segment
+    CS, // Code Segment
+    SS, // Stack Segment
+    DS, // Data Segment
 }
-
 
 impl TryFrom<u8> for SegmentRegister {
     type Error = &'static str;
@@ -105,11 +101,10 @@ impl TryFrom<u8> for SegmentRegister {
             0b01 => Ok(Self::CS),
             0b10 => Ok(Self::SS),
             0b11 => Ok(Self::DS),
-            _ => Err("Invalid segment register code.")
+            _ => Err("Invalid segment register code."),
         }
     }
 }
-
 
 impl fmt::Display for SegmentRegister {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -122,8 +117,6 @@ impl fmt::Display for SegmentRegister {
         write!(f, "{string}")
     }
 }
-
-
 
 #[cfg(test)]
 mod tests {
