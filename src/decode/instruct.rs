@@ -84,83 +84,83 @@ impl Instruction {
                 Ok((Instruction::Num(op), rest))
             }
             JumpEqual => Ok((
-                Instruction::Jump(CondJumpOp::Equal(bytes[0] as i8)),
+                Instruction::Jump(CondJumpOp::Equal(bytes[1] as i8)),
                 &bytes[2..],
             )),
             JumpLess => Ok((
-                Instruction::Jump(CondJumpOp::Less(bytes[0] as i8)),
+                Instruction::Jump(CondJumpOp::Less(bytes[1] as i8)),
                 &bytes[2..],
             )),
             JumpLessEq => Ok((
-                Instruction::Jump(CondJumpOp::LessEqual(bytes[0] as i8)),
+                Instruction::Jump(CondJumpOp::LessEqual(bytes[1] as i8)),
                 &bytes[2..],
             )),
             JumpBelow => Ok((
-                Instruction::Jump(CondJumpOp::Below(bytes[0] as i8)),
+                Instruction::Jump(CondJumpOp::Below(bytes[1] as i8)),
                 &bytes[2..],
             )),
             JumpBelowEq => Ok((
-                Instruction::Jump(CondJumpOp::BelowEqual(bytes[0] as i8)),
+                Instruction::Jump(CondJumpOp::BelowEqual(bytes[1] as i8)),
                 &bytes[2..],
             )),
             JumpParityEven => Ok((
-                Instruction::Jump(CondJumpOp::ParityEven(bytes[0] as i8)),
+                Instruction::Jump(CondJumpOp::ParityEven(bytes[1] as i8)),
                 &bytes[2..],
             )),
             JumpOverflow => Ok((
-                Instruction::Jump(CondJumpOp::Overflow(bytes[0] as i8)),
+                Instruction::Jump(CondJumpOp::Overflow(bytes[1] as i8)),
                 &bytes[2..],
             )),
             JumpNEqual => Ok((
-                Instruction::Jump(CondJumpOp::NotEqual(bytes[0] as i8)),
+                Instruction::Jump(CondJumpOp::NotEqual(bytes[1] as i8)),
                 &bytes[2..],
             )),
             JumpSign => Ok((
-                Instruction::Jump(CondJumpOp::Sign(bytes[0] as i8)),
+                Instruction::Jump(CondJumpOp::Sign(bytes[1] as i8)),
                 &bytes[2..],
             )),
             JumpGreaterEq => Ok((
-                Instruction::Jump(CondJumpOp::GreaterEqual(bytes[0] as i8)),
+                Instruction::Jump(CondJumpOp::GreaterEqual(bytes[1] as i8)),
                 &bytes[2..],
             )),
             JumpGreater => Ok((
-                Instruction::Jump(CondJumpOp::Greater(bytes[0] as i8)),
+                Instruction::Jump(CondJumpOp::Greater(bytes[1] as i8)),
                 &bytes[2..],
             )),
             JumpAboveEq => Ok((
-                Instruction::Jump(CondJumpOp::AboveEqual(bytes[0] as i8)),
+                Instruction::Jump(CondJumpOp::AboveEqual(bytes[1] as i8)),
                 &bytes[2..],
             )),
             JumpAbove => Ok((
-                Instruction::Jump(CondJumpOp::Above(bytes[0] as i8)),
+                Instruction::Jump(CondJumpOp::Above(bytes[1] as i8)),
                 &bytes[2..],
             )),
             JumpParityOdd => Ok((
-                Instruction::Jump(CondJumpOp::ParityOdd(bytes[0] as i8)),
+                Instruction::Jump(CondJumpOp::ParityOdd(bytes[1] as i8)),
                 &bytes[2..],
             )),
             JumpNOverflow => Ok((
-                Instruction::Jump(CondJumpOp::NotOverflow(bytes[0] as i8)),
+                Instruction::Jump(CondJumpOp::NotOverflow(bytes[1] as i8)),
                 &bytes[2..],
             )),
             JumpNSign => Ok((
-                Instruction::Jump(CondJumpOp::NotSign(bytes[0] as i8)),
+                Instruction::Jump(CondJumpOp::NotSign(bytes[1] as i8)),
                 &bytes[2..],
             )),
             Loop => Ok((
-                Instruction::Jump(CondJumpOp::Loop(bytes[0] as i8)),
+                Instruction::Jump(CondJumpOp::Loop(bytes[1] as i8)),
                 &bytes[2..]
             )),
             LoopEqual => Ok((
-                Instruction::Jump(CondJumpOp::LoopEqual(bytes[0] as i8)),
+                Instruction::Jump(CondJumpOp::LoopEqual(bytes[1] as i8)),
                 &bytes[2..]
             )),
             LoopNequal => Ok((
-                Instruction::Jump(CondJumpOp::LoopNEqual(bytes[0] as i8)),
+                Instruction::Jump(CondJumpOp::LoopNEqual(bytes[1] as i8)),
                 &bytes[2..]
             )),
             JumpCXZero => Ok((
-                Instruction::Jump(CondJumpOp::CXZero(bytes[0] as i8)),
+                Instruction::Jump(CondJumpOp::CXZero(bytes[1] as i8)),
                 &bytes[2..]
             )),
             PushRegRM => {

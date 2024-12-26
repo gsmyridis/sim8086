@@ -96,3 +96,18 @@ impl fmt::Display for Operand {
         }
     }
 }
+
+
+pub fn get_prefix<'a>(source: &'a Operand, dest: &'a Operand) -> &'a str {
+    match (source, dest) {
+        (Operand::Immediate(Value::Byte(_)), Operand::Memory(_)) => "byte ",
+        (Operand::Immediate(Value::Word(val)), Operand::Memory(_))=> {
+            if *val <= u8::MAX as u16 {
+                "word "
+            } else {
+                ""
+            }
+        },
+        _ => "",
+    }
+}

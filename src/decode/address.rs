@@ -9,7 +9,7 @@ use crate::register::Register;
 pub enum Displacement {
     None,
     NoneDirect(u16),
-    Byte(u8),
+    Byte(i8),
     Word(i16),
 }
 
@@ -26,7 +26,7 @@ impl Displacement {
                 }
             }
             Mode::Memory8 => {
-                Ok((Displacement::Byte(bytes[0]), &bytes[1..]))
+                Ok((Displacement::Byte(bytes[0] as i8), &bytes[1..]))
             }
             Mode::Memory16 => {
                 let addr = i16::from_le_bytes([bytes[0], bytes[1]]);

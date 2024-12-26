@@ -2,7 +2,7 @@ use std::fmt;
 
 use crate::decode::error::{DResult, DecodeError};
 use crate::decode::fields::{Direction, Mode, Reg, Sign, Width, RM};
-use crate::decode::operand::{get_operands, Operand, Value};
+use crate::decode::operand::{get_operands, Operand, Value, get_prefix};
 use crate::register::Register;
 
 pub enum NumOpType {
@@ -116,7 +116,7 @@ impl NumOp {
                 Ok((Self::new(source, dest, optype), &rest[1..]))
             }
             (Width::Word, Sign::Extend) => {
-                let val = Sign::extend_sign(rest[0]);
+                let val = (rest[0] as i8) as u16;
                 let source = Operand::immediate(Value::Word(val));
                 Ok((Self::new(source, dest, optype), &rest[1..]))
             }
@@ -135,7 +135,7 @@ impl NumOp {
             Width::Word => {
                 let dest = Operand::Register(Register::AX);
                 let source =
-                    Operand::immediate(Value::Word(u16::from_le_bytes([bytes[0], bytes[1]])));
+                    Operand::immediate(Value::Word(u16::from_le_bytes([bytes[1], bytes[2]])));
                 Ok((Self::new(source, dest, optype), &bytes[3..]))
                 // Maybe add Value::Signed(i16)
             }
@@ -145,27 +145,44 @@ impl NumOp {
 
 impl fmt::Display for NumOp {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+
         match self {
             Self::Add {
                 source,
                 destination,
-            } => write!(f, "add {destination}, {source}"),
+            } => {
+                let prefix = get_prefix(&source, &destination);
+                write!(f, "add {prefix}{destination}, {source}")
+            },
             Self::Adc {
                 source,
                 destination,
-            } => write!(f, "adc {destination}, {source}"),
+            } => {
+                let prefix = get_prefix(&source, &destination);
+                write!(f, "adc {prefix}{destination}, {source}")
+            },
             Self::Sub {
                 source,
                 destination,
-            } => write!(f, "sub {destination}, {source}"),
+            } => {
+                let prefix = get_prefix(&source, &destination);
+                write!(f, "sub {prefix}{destination}, {source}")
+            },
             Self::Sbb {
                 source,
                 destination,
-            } => write!(f, "sbb {destination}, {source}"),
+            } => {
+                let prefix = get_prefix(&source, &destination);
+                write!(f, "sbb {prefix}{destination}, {source}")
+            },
             Self::Cmp {
                 source,
                 destination,
-            } => write!(f, "cmp {destination}, {source}"),
+            } => {
+                let prefix = get_prefix(&source, &destination);
+                write!(f, "cmp {prefix}{destination}, {source}")
+            },
         }
     }
 }
+

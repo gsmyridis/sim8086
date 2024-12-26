@@ -88,14 +88,6 @@ impl Sign {
     pub fn parse_byte(byte: u8) -> Self {
         Self::from(get_bit(byte, 1))
     }
-
-    pub fn extend_sign(byte: u8) -> u16 {
-        if byte > 0b10000000 {
-            u16::from_le_bytes([0xFF, byte])
-        } else {
-            byte as u16
-        }
-    }
 }
 
 impl From<bool> for Sign {
