@@ -49,7 +49,7 @@ fn get_increment(w: &mut fmt::Formatter<'_>, mnemonic: &str, inc: i8) -> fmt::Re
     match inc + 2 {
         0 => write!(w, "{} $+0", mnemonic)?,
         (1..) => write!(w, "{} $+{}+0", mnemonic, inc + 2)?,
-        _ => write!(w, "{} ${}+0", mnemonic, inc + 2)?
+        _ => write!(w, "{} ${}+0", mnemonic, inc + 2)?,
     }
     Ok(())
 }

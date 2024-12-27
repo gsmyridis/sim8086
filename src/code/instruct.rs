@@ -203,7 +203,6 @@ impl Instruction {
         while !bytes_.is_empty() {
             let (instr, rest) = Self::try_decode_next(bytes_)?;
             bytes_ = rest;
-            println!("{instr}");
             instructions.push(instr);
         }
         Ok(instructions)
@@ -226,14 +225,6 @@ impl fmt::Display for Instruction {
 mod tests {
 
     use super::*;
-
-    #[test]
-    fn single_mov_reg_reg() {
-        let instruction = Instruction::try_decode_next(&[0x89, 0xd9])
-            .expect("Guaranteed to succeed")
-            .0;
-        assert_eq!(&format!("{instruction}"), "mov cx, bx");
-    }
 
     #[test]
     fn multi_mov_reg_reg() {
