@@ -18,6 +18,9 @@ pub mod ops;
 pub mod instruct;
 pub use instruct::Instruction;
 
+pub mod decode;
+pub use decode::Decoder;
+
 /// Returns the bit located in position `pos` from the given byte
 /// in boolean representation.
 #[inline]

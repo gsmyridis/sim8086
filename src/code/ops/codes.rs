@@ -72,7 +72,7 @@ create_opcodes! {
     // Loop Ops
     (Loop, "11100010");             // Loop CX times
     (LoopEqual, "11100001");        // Loop while Equal / Zero
-    (LoopNequal, "11100000");       // Loop while Not Equal / Zero
+    (LoopNEqual, "11100000");       // Loop while Not Equal / Zero
 
     // Push Pop Ops
     (PushRegRM, "11111111");

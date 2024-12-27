@@ -5,7 +5,9 @@ use std::path::PathBuf;
 use clap::{Parser, Subcommand};
 
 mod code;
-use code::{DecodeError, Instruction};
+use code::{DecodeError, Decoder};
+
+mod sim;
 
 #[derive(Parser)]
 struct Cli {
@@ -38,15 +40,16 @@ fn main() -> Result<(), DecodeError> {
             let mut buffer = Vec::new();
             file.read_to_end(&mut buffer)
                 .expect("Failed to read bytes from file.");
-            let instr = Instruction::try_decode(buffer.as_ref())?;
-            let s = instr
+
+            let decoder = Decoder::from(&buffer);
+            let asm = decoder
                 .into_iter()
-                .map(|s| s.to_string())
-                .collect::<Vec<_>>()
+                .map(|i| i.unwrap().to_string())
+                .collect::<Vec<String>>()
                 .join("\n");
 
             let mut output = fs::File::create(output).expect("Failed to create new output file.");
-            write!(output, "{s}").expect("Failed to write output.");
+            write!(output, "{asm}").expect("Failed to write output.");
         }
         _ => todo!(),
     }
