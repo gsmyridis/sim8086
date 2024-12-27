@@ -6,7 +6,6 @@ macro_rules! create_cond_jump_ops {
             ($opname:ident, $mnemonic:expr);
         )+
     ) => {
-
         #[derive(Debug)]
         pub enum CondJumpOp {
             $($opname(i8),)+
@@ -14,6 +13,14 @@ macro_rules! create_cond_jump_ops {
 
         impl fmt::Display for CondJumpOp {
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                let get_increment = |w: &mut fmt::Formatter<'_>, mnemonic: &str, inc: i8| -> fmt::Result {
+                    match inc + 2 {
+                        0 => write!(w, "{} $+0", mnemonic)?,
+                        1.. => write!(w, "{} $+{}+0", mnemonic, inc + 2)?,
+                        _ => write!(w, "{} ${}+0", mnemonic, inc + 2)?,
+                    }
+                    Ok(())
+                };
                 match self {
                     $(Self::$opname(inc) => get_increment(f, $mnemonic, *inc),)+
                 }
@@ -43,13 +50,4 @@ create_cond_jump_ops! {
     (Loop, "loop");
     (LoopEqual, "loopz");
     (LoopNEqual, "loopnz");
-}
-
-fn get_increment(w: &mut fmt::Formatter<'_>, mnemonic: &str, inc: i8) -> fmt::Result {
-    match inc + 2 {
-        0 => write!(w, "{} $+0", mnemonic)?,
-        (1..) => write!(w, "{} $+{}+0", mnemonic, inc + 2)?,
-        _ => write!(w, "{} ${}+0", mnemonic, inc + 2)?,
-    }
-    Ok(())
 }
