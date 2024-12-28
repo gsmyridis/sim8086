@@ -42,14 +42,14 @@ impl MovOp {
 
         match width {
             Width::Byte => {
-                let source = Operand::immediate(Value::Byte(remaining[0]));
+                let source = Operand::immediate(Value::byte(remaining[0]));
                 Ok((MovOp::new(source, dest), &remaining[1..]))
             }
             Width::Word => {
-                let source = Operand::immediate(Value::Word(u16::from_le_bytes([
+                let source = Operand::immediate(Value::word([
                     remaining[0],
                     remaining[1],
-                ])));
+                ]));
                 Ok((MovOp::new(source, dest), &remaining[2..]))
             }
         }
@@ -61,8 +61,8 @@ impl MovOp {
         let n_bytes = width.n_bytes();
         let reg = Reg::parse_byte_low(bytes[0]);
         let value = match width {
-            Width::Byte => Value::Byte(bytes[1]),
-            Width::Word => Value::Word(u16::from_le_bytes([bytes[1], bytes[2]])),
+            Width::Byte => Value::byte(bytes[1]),
+            Width::Word => Value::word([bytes[1], bytes[2]]),
         };
 
         let source = Operand::immediate(value);

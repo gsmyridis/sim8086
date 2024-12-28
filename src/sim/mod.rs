@@ -1,3 +1,6 @@
+pub mod error;
+pub use error::{ExecutionError, EResult};
+
 pub mod cpu;
 pub use cpu::Cpu;
 

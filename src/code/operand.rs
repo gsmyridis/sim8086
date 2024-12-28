@@ -5,10 +5,20 @@ use super::{
     RM,
 };
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Value {
-    Byte(u8),
-    Word(u16),
+    Byte(i8),
+    Word(i16),
+}
+
+impl Value {
+    pub fn word(bytes: [u8; 2]) -> Self {
+        Value::Word(i16::from_le_bytes(bytes))
+    }
+
+    pub fn byte(byte: u8) -> Self {
+        Value::Byte(byte as i8)
+    }
 }
 
 impl fmt::Display for Value {
@@ -101,7 +111,7 @@ pub fn get_prefix<'a>(source: &'a Operand, dest: &'a Operand) -> &'a str {
     match (source, dest) {
         (Operand::Immediate(Value::Byte(_)), Operand::Memory(_)) => "byte ",
         (Operand::Immediate(Value::Word(val)), Operand::Memory(_)) => {
-            if *val <= u8::MAX as u16 {
+            if (*val).abs() <= i8::MAX as i16 {
                 "word "
             } else {
                 ""

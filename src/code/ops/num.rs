@@ -102,20 +102,20 @@ impl NumOp {
 
         match (width, sign) {
             (Width::Byte, Sign::NoExtention) => {
-                let source = Operand::immediate(Value::Byte(rest[0]));
+                let source = Operand::immediate(Value::byte(rest[0]));
                 Ok((Self::new(source, dest, optype), &rest[1..]))
             }
             (Width::Word, Sign::NoExtention) => {
                 let source =
-                    Operand::immediate(Value::Word(u16::from_le_bytes([bytes[1], bytes[2]])));
+                    Operand::immediate(Value::word([bytes[1], bytes[2]]));
                 Ok((Self::new(source, dest, optype), &rest[2..]))
             }
             (Width::Byte, Sign::Extend) => {
-                let source = Operand::immediate(Value::Byte(rest[0]));
+                let source = Operand::immediate(Value::byte(rest[0]));
                 Ok((Self::new(source, dest, optype), &rest[1..]))
             }
             (Width::Word, Sign::Extend) => {
-                let val = (rest[0] as i8) as u16;
+                let val = (rest[0] as i8) as i16;
                 let source = Operand::immediate(Value::Word(val));
                 Ok((Self::new(source, dest, optype), &rest[1..]))
             }
@@ -128,13 +128,13 @@ impl NumOp {
         match Width::parse_byte(bytes[0], 0) {
             Width::Byte => {
                 let dest = Operand::Register(Register::AL);
-                let source = Operand::immediate(Value::Byte(bytes[1]));
+                let source = Operand::immediate(Value::byte(bytes[1]));
                 Ok((Self::new(source, dest, optype), &bytes[2..]))
             }
             Width::Word => {
                 let dest = Operand::Register(Register::AX);
                 let source =
-                    Operand::immediate(Value::Word(u16::from_le_bytes([bytes[1], bytes[2]])));
+                    Operand::immediate(Value::word([bytes[1], bytes[2]]));
                 Ok((Self::new(source, dest, optype), &bytes[3..]))
                 // Maybe add Value::Signed(i16)
             }
