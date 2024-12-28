@@ -2,7 +2,6 @@ use std::fmt;
 
 use crate::code::{Register, SegmentRegister, Value};
 
-
 #[derive(Debug, Default)]
 pub struct Flags {
     zero: bool,
@@ -11,14 +10,13 @@ pub struct Flags {
 
 impl fmt::Display for Flags {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "FLAGS\n")?;
-        write!(f, "-------------------\n")?;
-        write!(f, "- Zero: {}\n", self.zero)?;
-        write!(f, "- Sign: {}\n", self.sign)?;
+        writeln!(f, "FLAGS")?;
+        writeln!(f, "-------------------")?;
+        writeln!(f, "- Zero: {}", self.zero)?;
+        writeln!(f, "- Sign: {}", self.sign)?;
         Ok(())
     }
 }
-
 
 #[derive(Debug, Default)]
 pub struct Registers {
@@ -56,18 +54,16 @@ impl Registers {
 
     pub fn set(&mut self, reg: &Register, val: Value) {
         match val {
-            Value::Byte(v) => {
-                match reg {
-                    Register::AL => self.ax[0] = v as u8,
-                    Register::AH => self.ax[1] = v as u8,
-                    Register::BL => self.bx[0] = v as u8,
-                    Register::BH => self.bx[1] = v as u8,
-                    Register::CL => self.cx[0] = v as u8,
-                    Register::CH => self.cx[1] = v as u8,
-                    Register::DL => self.dx[0] = v as u8,
-                    Register::DH => self.dx[1] = v as u8,
-                    _ => panic!("Two bytes value for single byte register.")
-                }
+            Value::Byte(v) => match reg {
+                Register::AL => self.ax[0] = v as u8,
+                Register::AH => self.ax[1] = v as u8,
+                Register::BL => self.bx[0] = v as u8,
+                Register::BH => self.bx[1] = v as u8,
+                Register::CL => self.cx[0] = v as u8,
+                Register::CH => self.cx[1] = v as u8,
+                Register::DL => self.dx[0] = v as u8,
+                Register::DH => self.dx[1] = v as u8,
+                _ => panic!("Two bytes value for single byte register."),
             },
             Value::Word(v) => {
                 let bytes = v.to_le_bytes();
@@ -80,7 +76,7 @@ impl Registers {
                     Register::BP => self.bp = bytes,
                     Register::SI => self.si = bytes,
                     Register::DI => self.di = bytes,
-                    _ => panic!("Single byte for word register.")
+                    _ => panic!("Single byte for word register."),
                 }
             }
         };
@@ -89,16 +85,16 @@ impl Registers {
 
 impl fmt::Display for Registers {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "REGISTERS\n")?;
-        write!(f, "-------------------\n")?;
-        write!(f, "- AX: {:x}\n", i16::from_le_bytes(self.ax))?;
-        write!(f, "- BX: {:x}\n", i16::from_le_bytes(self.bx))?;
-        write!(f, "- CX: {:x}\n", i16::from_le_bytes(self.cx))?;
-        write!(f, "- DX: {:x}\n", i16::from_le_bytes(self.dx))?;
-        write!(f, "- SP: {:x}\n", i16::from_le_bytes(self.sp))?;
-        write!(f, "- BP: {:x}\n", i16::from_le_bytes(self.bp))?;
-        write!(f, "- SI: {:x}\n", i16::from_le_bytes(self.si))?;
-        write!(f, "- DI: {:x}\n", i16::from_le_bytes(self.di))?;
+        writeln!(f, "REGISTERS")?;
+        writeln!(f, "-------------------")?;
+        writeln!(f, "- AX: {:x}", i16::from_le_bytes(self.ax))?;
+        writeln!(f, "- BX: {:x}", i16::from_le_bytes(self.bx))?;
+        writeln!(f, "- CX: {:x}", i16::from_le_bytes(self.cx))?;
+        writeln!(f, "- DX: {:x}", i16::from_le_bytes(self.dx))?;
+        writeln!(f, "- SP: {:x}", i16::from_le_bytes(self.sp))?;
+        writeln!(f, "- BP: {:x}", i16::from_le_bytes(self.bp))?;
+        writeln!(f, "- SI: {:x}", i16::from_le_bytes(self.si))?;
+        writeln!(f, "- DI: {:x}", i16::from_le_bytes(self.di))?;
         Ok(())
     }
 }
@@ -132,25 +128,23 @@ impl SegmentRegisters {
                     SegmentRegister::SS => self.ss = bytes,
                     SegmentRegister::DS => self.ds = bytes,
                 };
-            },
-            _ => panic!("The value of a segment register can be set to a word value.")
+            }
+            _ => panic!("The value of a segment register can be set to a word value."),
         }
     }
 }
 
 impl fmt::Display for SegmentRegisters {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "SEGMENT REGISTERS\n")?;
-        write!(f, "-------------------\n")?;
-        write!(f, "- ES: {:x}\n", i16::from_le_bytes(self.es))?;
-        write!(f, "- CS: {:x}\n", i16::from_le_bytes(self.cs))?;
-        write!(f, "- SS: {:x}\n", i16::from_le_bytes(self.ss))?;
-        write!(f, "- DS: {:x}\n", i16::from_le_bytes(self.ds))?;
+        writeln!(f, "SEGMENT REGISTERS")?;
+        writeln!(f, "-------------------")?;
+        writeln!(f, "- ES: {:x}", i16::from_le_bytes(self.es))?;
+        writeln!(f, "- CS: {:x}", i16::from_le_bytes(self.cs))?;
+        writeln!(f, "- SS: {:x}", i16::from_le_bytes(self.ss))?;
+        writeln!(f, "- DS: {:x}", i16::from_le_bytes(self.ds))?;
         Ok(())
     }
 }
-
-
 
 #[cfg(test)]
 mod tests {

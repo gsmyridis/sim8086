@@ -106,8 +106,7 @@ impl NumOp {
                 Ok((Self::new(source, dest, optype), &rest[1..]))
             }
             (Width::Word, Sign::NoExtention) => {
-                let source =
-                    Operand::immediate(Value::word([bytes[1], bytes[2]]));
+                let source = Operand::immediate(Value::word([bytes[1], bytes[2]]));
                 Ok((Self::new(source, dest, optype), &rest[2..]))
             }
             (Width::Byte, Sign::Extend) => {
@@ -133,8 +132,7 @@ impl NumOp {
             }
             Width::Word => {
                 let dest = Operand::Register(Register::AX);
-                let source =
-                    Operand::immediate(Value::word([bytes[1], bytes[2]]));
+                let source = Operand::immediate(Value::word([bytes[1], bytes[2]]));
                 Ok((Self::new(source, dest, optype), &bytes[3..]))
                 // Maybe add Value::Signed(i16)
             }

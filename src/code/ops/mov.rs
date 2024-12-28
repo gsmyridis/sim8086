@@ -1,7 +1,9 @@
 use std::fmt;
 
 use crate::code::fields::*;
-use crate::code::{get_bit, get_operands, DResult, SegmentRegister, EffectiveAddr, Operand, Register, Value};
+use crate::code::{
+    get_bit, get_operands, DResult, EffectiveAddr, Operand, Register, SegmentRegister, Value,
+};
 
 #[derive(Debug)]
 pub struct MovOp {
@@ -46,10 +48,7 @@ impl MovOp {
                 Ok((MovOp::new(source, dest), &remaining[1..]))
             }
             Width::Word => {
-                let source = Operand::immediate(Value::word([
-                    remaining[0],
-                    remaining[1],
-                ]));
+                let source = Operand::immediate(Value::word([remaining[0], remaining[1]]));
                 Ok((MovOp::new(source, dest), &remaining[2..]))
             }
         }
@@ -98,7 +97,7 @@ impl MovOp {
             Direction::Source => (segreg_operand, rm_operand),
             Direction::Destination => (rm_operand, segreg_operand),
         };
-        Ok((MovOp::new(source, dest), &rest))
+        Ok((MovOp::new(source, dest), rest))
     }
 }
 

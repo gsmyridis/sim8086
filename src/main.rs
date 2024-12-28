@@ -10,7 +10,6 @@ use code::{DecodeError, Decoder};
 mod sim;
 use sim::Cpu;
 
-
 #[derive(Parser)]
 struct Cli {
     #[command(subcommand)]
@@ -34,13 +33,11 @@ pub enum Command {
     },
 }
 
-
 fn main() -> Result<(), DecodeError> {
     let cli = Cli::parse();
     match cli.command {
         Command::Decode { path, output } => {
-            let buffer = std::fs::read(path)
-                .expect("Failed to read input byte-code file.");
+            let buffer = std::fs::read(path).expect("Failed to read input byte-code file.");
             let decoder = Decoder::from(&buffer);
             let asm = decoder
                 .into_iter()
@@ -52,12 +49,9 @@ fn main() -> Result<(), DecodeError> {
             write!(output, "{asm}").expect("Failed to write output.");
         }
         Command::Execute { path, output } => {
-            let buffer = std::fs::read(path)
-                .expect("Failed to read input byte-code file.");
+            let buffer = std::fs::read(path).expect("Failed to read input byte-code file.");
             let decoder = Decoder::from(&buffer);
-            let instr = decoder.into_iter()
-                .map(|i| i.unwrap())
-                .collect::<Vec<_>>();
+            let instr = decoder.into_iter().map(|i| i.unwrap()).collect::<Vec<_>>();
 
             let mut cpu = Cpu::default();
 
@@ -66,7 +60,7 @@ fn main() -> Result<(), DecodeError> {
             }
 
             println!("{cpu}");
-        },
+        }
     }
     Ok(())
 }

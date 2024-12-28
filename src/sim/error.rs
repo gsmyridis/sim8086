@@ -1,6 +1,6 @@
 #[derive(Debug)]
 pub enum ExecutionError {
-    ImmediateDestination 
+    ImmediateDestination,
 }
 
 pub type EResult<T> = Result<T, ExecutionError>;

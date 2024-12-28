@@ -52,8 +52,7 @@ macro_rules! create_push_pop_op {
     }
 }
 
-
-create_push_pop_op!{
+create_push_pop_op! {
     (PushOp, "push");
     (PopOp, "pop");
 }

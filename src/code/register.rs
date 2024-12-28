@@ -2,7 +2,6 @@ use std::fmt;
 
 use super::DecodeError;
 
-
 #[derive(Debug, PartialEq)]
 pub enum Register {
     AL, // Low byte of A register.
