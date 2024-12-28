@@ -1,12 +1,12 @@
 use std::fmt;
 
 use crate::code::fields::*;
-use crate::code::{get_bit, get_operands, DResult, EffectiveAddr, Operand, Register, Value};
+use crate::code::{get_bit, get_operands, DResult, SegmentRegister, EffectiveAddr, Operand, Register, Value};
 
 #[derive(Debug)]
 pub struct MovOp {
-    source: Operand,
-    destination: Operand,
+    pub source: Operand,
+    pub destination: Operand,
 }
 
 impl MovOp {
@@ -83,6 +83,22 @@ impl MovOp {
             false => (mem, acc),
         };
         Ok((MovOp::new(source, dest), &bytes[3..]))
+    }
+
+    pub fn try_decode_rm_segreg(bytes: &[u8]) -> DResult<Self, &[u8]> {
+        let mode = Mode::try_parse_byte(bytes[1])?;
+        let sr = (bytes[1] >> 3) & 0b11;
+        let segreg = SegmentRegister::try_from(sr)?;
+        let rm = RM::parse_byte(bytes[1]).as_u8();
+
+        let (rm_operand, rest) = Operand::register_or_memory(true, &mode, rm, &bytes[2..])?;
+        let segreg_operand = Operand::SegmentRegister(segreg);
+
+        let (source, dest) = match Direction::parse_byte(bytes[0]) {
+            Direction::Source => (segreg_operand, rm_operand),
+            Direction::Destination => (rm_operand, segreg_operand),
+        };
+        Ok((MovOp::new(source, dest), &rest))
     }
 }
 

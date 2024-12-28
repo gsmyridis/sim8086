@@ -35,7 +35,10 @@ impl Decoder<'_> {
                 let (op, rest) = MovOp::try_decode_mem_acc(bytes)?;
                 Ok((Instruction::Mov(op), rest))
             }
-            MovRMSegReg | MovSegRegRM => todo!(),
+            MovRMSegReg | MovSegRegRM => {
+                let (op, rest) = MovOp::try_decode_rm_segreg(bytes)?;
+                Ok((Instruction::Mov(op), rest))
+            },
             NumImRM => {
                 let (op, rest) = NumOp::try_decode_im_rm(bytes)?;
                 Ok((Instruction::Num(op), rest))
@@ -207,3 +210,4 @@ impl Iterator for Decoder<'_> {
         }
     }
 }
+

@@ -5,7 +5,7 @@ use super::{
     RM,
 };
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Value {
     Byte(u8),
     Word(u16),

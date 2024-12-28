@@ -2,6 +2,7 @@
 pub enum DecodeError {
     Mode,
     NumType,
+    SegmentRegister,
     OpCode(String),
     Displacement,
 }

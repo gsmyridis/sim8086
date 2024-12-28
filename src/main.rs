@@ -8,6 +8,8 @@ mod code;
 use code::{DecodeError, Decoder};
 
 mod sim;
+use sim::Cpu;
+
 
 #[derive(Parser)]
 struct Cli {
@@ -32,26 +34,39 @@ pub enum Command {
     },
 }
 
+
 fn main() -> Result<(), DecodeError> {
     let cli = Cli::parse();
     match cli.command {
         Command::Decode { path, output } => {
-            let mut file = fs::File::open(path).expect("Failed to open file.");
-            let mut buffer = Vec::new();
-            file.read_to_end(&mut buffer)
-                .expect("Failed to read bytes from file.");
-
+            let buffer = std::fs::read(path)
+                .expect("Failed to read input byte-code file.");
             let decoder = Decoder::from(&buffer);
             let asm = decoder
                 .into_iter()
                 .map(|i| i.unwrap().to_string())
-                .collect::<Vec<String>>()
+                .collect::<Vec<_>>()
                 .join("\n");
 
             let mut output = fs::File::create(output).expect("Failed to create new output file.");
             write!(output, "{asm}").expect("Failed to write output.");
         }
-        _ => todo!(),
+        Command::Execute { path, output } => {
+            let buffer = std::fs::read(path)
+                .expect("Failed to read input byte-code file.");
+            let decoder = Decoder::from(&buffer);
+            let instr = decoder.into_iter()
+                .map(|i| i.unwrap())
+                .collect::<Vec<_>>();
+
+            let mut cpu = Cpu::default();
+
+            for i in instr {
+                cpu.execute(i).unwrap();
+            }
+
+            println!("{cpu}");
+        },
     }
     Ok(())
 }

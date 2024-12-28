@@ -1,5 +1,8 @@
 use std::fmt;
 
+use super::DecodeError;
+
+
 #[derive(Debug, PartialEq)]
 pub enum Register {
     AL, // Low byte of A register.
@@ -93,7 +96,7 @@ pub enum SegmentRegister {
 }
 
 impl TryFrom<u8> for SegmentRegister {
-    type Error = &'static str;
+    type Error = DecodeError;
 
     fn try_from(byte: u8) -> Result<Self, Self::Error> {
         match byte {
@@ -101,7 +104,7 @@ impl TryFrom<u8> for SegmentRegister {
             0b01 => Ok(Self::CS),
             0b10 => Ok(Self::SS),
             0b11 => Ok(Self::DS),
-            _ => Err("Invalid segment register code."),
+            _ => Err(DecodeError::SegmentRegister),
         }
     }
 }
