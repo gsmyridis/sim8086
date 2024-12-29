@@ -19,6 +19,20 @@ impl Value {
     pub fn byte(byte: u8) -> Self {
         Value::Byte(byte as i8)
     }
+
+    pub fn is_zero(&self) -> bool {
+        match self {
+            Self::Byte(v) => *v == 0,
+            Self::Word(v) => *v == 0,
+        }
+    }
+
+    pub fn is_positive(&self) -> bool {
+        match self {
+            Self::Byte(v) => *v > 0,
+            Self::Word(v) => *v > 0,
+        }
+    }
 }
 
 impl fmt::Display for Value {

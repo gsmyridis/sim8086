@@ -6,6 +6,35 @@ use crate::code::{Register, SegmentRegister, Value};
 pub struct Flags {
     zero: bool,
     sign: bool,
+    carry: bool,
+    borrow: bool,
+}
+
+impl Flags {
+    pub fn set_zero(&mut self) {
+        self.zero = true;
+        self.sign = false;
+    }
+
+    pub fn set_negative(&mut self) {
+        self.zero = false;
+        self.sign = true;
+    }
+
+    pub fn set_positive(&mut self) {
+        self.zero = false;
+        self.sign = false;
+    }
+
+    pub fn set_from_value(&mut self, val: &Value) {
+        if val.is_zero() {
+            self.set_zero();
+        } else if val.is_positive() {
+            self.set_positive();
+        } else {
+            self.set_negative();
+        }
+    }
 }
 
 impl fmt::Display for Flags {

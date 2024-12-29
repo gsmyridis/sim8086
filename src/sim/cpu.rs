@@ -60,6 +60,7 @@ impl Cpu {
 
     fn exec_mov(&mut self, op: MovOp) -> EResult<()> {
         let val = self.get_operand_value(&op.source);
+        println!("mov {}, {} -> {} {val}", &op.destination, &op.source, &op.destination);
         self.set_value(&op.destination, val)
     }
 
@@ -84,44 +85,45 @@ impl Cpu {
                 let source_val = self.get_operand_value(&source);
                 let dest_val = self.get_destination_value(&destination)?;
                 let val = add_values(source_val, dest_val)?;
+                println!("add {destination} {source} -> {destination} {val}");
+                self.flags.set_from_value(&val);
                 self.set_value(&destination, val)
             }
             NumOp::Adc {
                 source,
                 destination,
             } => {
-                let source_val = self.get_operand_value(&source);
-                let dest_val = self.get_destination_value(&destination)?;
                 todo!()
             }
             NumOp::Sub {
                 source,
                 destination,
             } => {
-                let source_val = self.get_operand_value(&source);
-                let dest_val = self.get_destination_value(&destination)?;
-                println!("{source_val:?} {dest_val:?}");
-                let val = sub_values(source_val, dest_val)?;
+                let sval = self.get_operand_value(&source);
+                let dval = self.get_destination_value(&destination)?;
+                let val = sub_values(sval, dval)?;
+                self.flags.set_from_value(&val);
+                println!("sub {destination} {source} -> {destination} {val}");
                 self.set_value(&destination, val)
             }
             NumOp::Sbb {
                 source,
                 destination,
             } => {
-                let source_val = self.get_operand_value(&source);
-                let dest_val = self.get_destination_value(&destination)?;
                 todo!()
             }
             NumOp::Cmp {
                 source,
                 destination,
             } => {
-                let source_val = self.get_operand_value(&source);
-                let dest_val = self.get_destination_value(&destination)?;
-                todo!()
+                let sval = self.get_operand_value(&source);
+                let dval = self.get_destination_value(&destination)?;
+                println!("cmp {destination}, {source}");
+                let val = sub_values(sval, dval)?;
+                self.flags.set_from_value(&val);
+                Ok(())
             }
         }
-        // Set flags
     }
 
     fn exec_jump(&mut self, _op: CondJumpOp) -> Result<(), ()> {
