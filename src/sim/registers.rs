@@ -4,26 +4,53 @@ use crate::code::{Register, SegmentRegister, Value};
 
 #[derive(Debug, Default)]
 pub struct Flags {
+    // Status flags
     zero: bool,
     sign: bool,
-    carry: bool,
-    borrow: bool,
+    parity: bool,
+    pub carry: bool,
+    pub aux_carry: bool,
+    pub overflow: bool,
+
+    // Control flags
+    trap: bool,
+    interupt_enable: bool,
+    direction: bool,
 }
 
 impl Flags {
+    /// Sets the status flags for result zero. 
+    #[inline]
     pub fn set_zero(&mut self) {
         self.zero = true;
+        self.parity = true;
         self.sign = false;
     }
 
+    /// Sets the status flags for positive result.
+    #[inline]
+    pub fn set_positive(&mut self) {
+        self.zero = false;
+        self.sign = false;
+    }
+
+    /// Sets the status flags for negative result.
+    #[inline]
     pub fn set_negative(&mut self) {
         self.zero = false;
         self.sign = true;
     }
 
-    pub fn set_positive(&mut self) {
-        self.zero = false;
-        self.sign = false;
+    /// Sets the parity status flag for even result.
+    #[inline]
+    pub fn set_even(&mut self) {
+        self.parity = true;
+    }
+
+    /// Sets the parity status flag for odd result.
+    #[inline]
+    pub fn set_odd(&mut self) {
+        self.parity = false;
     }
 
     pub fn set_from_value(&mut self, val: &Value) {
@@ -34,6 +61,11 @@ impl Flags {
         } else {
             self.set_negative();
         }
+
+        match val.is_even() {
+            true => self.set_even(),
+            false => self.set_odd(),
+        }
     }
 }
 
@@ -43,10 +75,15 @@ impl fmt::Display for Flags {
         writeln!(f, "-------------------")?;
         writeln!(f, "- Zero: {}", self.zero)?;
         writeln!(f, "- Sign: {}", self.sign)?;
+        writeln!(f, "- Parity: {}", self.parity)?;
+        writeln!(f, "- Overflow: {}", self.overflow)?;
+        writeln!(f, "- Carry: {}", self.carry)?;
+        writeln!(f, "- Auxiliary Carry: {}", self.aux_carry)?;
         Ok(())
     }
 }
 
+/// Struct that holds the values of the general registers.
 #[derive(Debug, Default)]
 pub struct Registers {
     ax: [u8; 2],
@@ -60,6 +97,7 @@ pub struct Registers {
 }
 
 impl Registers {
+    /// Returns the value of the specified general register.
     pub fn get(&self, reg: &Register) -> Value {
         match reg {
             Register::AX => Value::word(self.ax),
@@ -81,6 +119,7 @@ impl Registers {
         }
     }
 
+    /// Sets the value of the specified general register.
     pub fn set(&mut self, reg: &Register, val: Value) {
         match val {
             Value::Byte(v) => match reg {
@@ -116,18 +155,19 @@ impl fmt::Display for Registers {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "REGISTERS")?;
         writeln!(f, "-------------------")?;
-        writeln!(f, "- AX: {:x}", i16::from_le_bytes(self.ax))?;
-        writeln!(f, "- BX: {:x}", i16::from_le_bytes(self.bx))?;
-        writeln!(f, "- CX: {:x}", i16::from_le_bytes(self.cx))?;
-        writeln!(f, "- DX: {:x}", i16::from_le_bytes(self.dx))?;
-        writeln!(f, "- SP: {:x}", i16::from_le_bytes(self.sp))?;
-        writeln!(f, "- BP: {:x}", i16::from_le_bytes(self.bp))?;
-        writeln!(f, "- SI: {:x}", i16::from_le_bytes(self.si))?;
-        writeln!(f, "- DI: {:x}", i16::from_le_bytes(self.di))?;
+        writeln!(f, "- AX: 0x{:04x}", i16::from_le_bytes(self.ax))?;
+        writeln!(f, "- BX: 0x{:04x}", i16::from_le_bytes(self.bx))?;
+        writeln!(f, "- CX: 0x{:04x}", i16::from_le_bytes(self.cx))?;
+        writeln!(f, "- DX: 0x{:04x}", i16::from_le_bytes(self.dx))?;
+        writeln!(f, "- SP: 0x{:04x}", i16::from_le_bytes(self.sp))?;
+        writeln!(f, "- BP: 0x{:04x}", i16::from_le_bytes(self.bp))?;
+        writeln!(f, "- SI: 0x{:04x}", i16::from_le_bytes(self.si))?;
+        writeln!(f, "- DI: 0x{:04x}", i16::from_le_bytes(self.di))?;
         Ok(())
     }
 }
 
+/// Structs that stores the values of the segment registers.
 #[derive(Debug, Default)]
 pub struct SegmentRegisters {
     es: [u8; 2],
@@ -137,6 +177,7 @@ pub struct SegmentRegisters {
 }
 
 impl SegmentRegisters {
+    /// Returns the value of the specified segment register.
     pub fn get(&self, segreg: &SegmentRegister) -> Value {
         let bytes = match segreg {
             SegmentRegister::ES => self.es,
@@ -147,6 +188,7 @@ impl SegmentRegisters {
         Value::word(bytes)
     }
 
+    /// Sets the value of the specified segment register.
     pub fn set(&mut self, segreg: &SegmentRegister, val: Value) {
         match val {
             Value::Word(v) => {
@@ -167,10 +209,10 @@ impl fmt::Display for SegmentRegisters {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "SEGMENT REGISTERS")?;
         writeln!(f, "-------------------")?;
-        writeln!(f, "- ES: {:x}", i16::from_le_bytes(self.es))?;
-        writeln!(f, "- CS: {:x}", i16::from_le_bytes(self.cs))?;
-        writeln!(f, "- SS: {:x}", i16::from_le_bytes(self.ss))?;
-        writeln!(f, "- DS: {:x}", i16::from_le_bytes(self.ds))?;
+        writeln!(f, "- ES: 0x{:04x}", i16::from_le_bytes(self.es))?;
+        writeln!(f, "- CS: 0x{:04x}", i16::from_le_bytes(self.cs))?;
+        writeln!(f, "- SS: 0x{:04x}", i16::from_le_bytes(self.ss))?;
+        writeln!(f, "- DS: 0x{:04x}", i16::from_le_bytes(self.ds))?;
         Ok(())
     }
 }

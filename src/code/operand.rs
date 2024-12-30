@@ -1,11 +1,12 @@
 use std::fmt;
+use std::cmp::Ordering;
 
 use super::{
     DResult, Direction, Displacement, EffectiveAddr, Mode, Reg, Register, SegmentRegister, Width,
     RM,
 };
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Value {
     Byte(i8),
     Word(i16),
@@ -33,7 +34,57 @@ impl Value {
             Self::Word(v) => *v > 0,
         }
     }
+
+    pub fn is_even(&self) -> bool {
+        match self {
+            Self::Byte(v) => *v % 2 == 0,
+            Self::Word(v) => *v % 2 == 0,
+        }
+    }
+
+    /// Adds two values returning the result along with the overflow, carry and 
+    /// auxiliary carry flags.
+    pub fn flagged_add(&self, other: &Value) -> (Value, bool, bool, bool) {
+        match (self, other) {
+            (Value::Word(v1), Value::Word(v2)) => {
+                let (val, ov) = (*v1).overflowing_add(*v2);
+                let (_, carry) = (*v1 as u16).overflowing_add(*v2 as u16);
+                let aux_carry = (*v1 & 0xF) + (*v2 & 0xF) > 0xF;
+                (Value::Word(val), ov, carry, aux_carry)
+            },
+            _ => panic!("Overflowing add has been implemented only for word-word."),
+        }
+    }
+
+    /// Subtracts two values returning the result along with the overflow, carry and 
+    /// auxiliary carry flags.
+    pub fn flagged_sub(&self, other: &Value) -> (Value, bool, bool, bool) {
+        match (self, other) {
+            (Value::Word(v1), Value::Word(v2)) => {
+                let (val, ov) = (*v1).overflowing_sub(*v2);
+                let carry = (*v1 as u16) < (*v2 as u16);
+                let aux_carry = (*v1 & 0xF) < (*v2 & 0xF);
+                (Value::Word(val), ov, carry, aux_carry)
+            },
+            _ => panic!("Overflowing sub has been implemented only for word-word."),
+        }
+    }
+
+    pub fn cmp(&self, other: &Self) -> Ordering {
+        let val_self = match self {
+            Self::Byte(v) => *v as i16,
+            Self::Word(v) => *v,
+        };
+
+        let val_other = match other {
+            Self::Byte(v) => *v as i16,
+            Self::Word(v) => *v,
+        };
+
+        val_self.cmp(&val_other)
+    }
 }
+
 
 impl fmt::Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
