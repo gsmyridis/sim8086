@@ -1,8 +1,9 @@
 use std::fmt;
 
 use crate::code::fields::*;
-use crate::code::operand::{get_operands, get_prefix, Operand, Value};
+use crate::code::operand::{get_operands, get_prefix, Operand};
 use crate::code::{DResult, DecodeError, Register};
+use crate::value::Value;
 
 pub enum NumOpType {
     Add = 0b000,
@@ -76,63 +77,64 @@ impl NumOp {
 
     /// Tries to decode a Register/Memory - Register arithmetic operation.
     /// These include ADD, ADC, SUB, SBB, and CMP.
-    pub fn try_decode_rm_reg(bytes: &[u8], optype: NumOpType) -> DResult<Self, &[u8]> {
+    pub fn try_decode_rm_reg(bytes: &[u8], optype: NumOpType) -> DResult<Self> {
         let width = Width::parse_byte(bytes[0], 0);
         let direction = Direction::parse_byte(bytes[0]);
         let mode = Mode::try_parse_byte(bytes[1])?;
         let reg = Reg::parse_byte_mid(bytes[1]);
         let rm = RM::parse_byte(bytes[1]);
 
-        let ((source, dest), rest) = get_operands(mode, direction, width, reg, rm, &bytes[2..])?;
-        Ok((Self::new(source, dest, optype), rest))
+        let ((source, dest), bytes_read) = get_operands(mode, direction, width, reg, rm, &bytes[2..])?;
+        Ok((Self::new(source, dest, optype), bytes_read + 2))
     }
 
     /// Tries to decode an Immediate - Register/Memory arithmetic operation.
     /// These include ADD, ADC, SUB, SBB, and CMP.
-    pub fn try_decode_im_rm(bytes: &[u8]) -> DResult<Self, &[u8]> {
+    pub fn try_decode_im_rm(bytes: &[u8]) -> DResult<Self> {
         let width = Width::parse_byte(bytes[0], 0);
         let sign = Sign::parse_byte(bytes[0]);
         let mode = Mode::try_parse_byte(bytes[1])?;
         let optype = NumOpType::try_parse_byte(bytes[1])?;
         let rm = RM::parse_byte(bytes[1]);
 
-        let (dest, rest) =
+        let (dest, bytes_read) =
             Operand::register_or_memory(width.as_bool(), &mode, rm.as_u8(), &bytes[2..])?;
+        let rest = &bytes[2 + bytes_read..];
 
         match (width, sign) {
             (Width::Byte, Sign::NoExtention) => {
                 let source = Operand::immediate(Value::byte(rest[0]));
-                Ok((Self::new(source, dest, optype), &rest[1..]))
+                Ok((Self::new(source, dest, optype), 3 + bytes_read))
             }
             (Width::Word, Sign::NoExtention) => {
                 let source = Operand::immediate(Value::word([rest[0], rest[1]]));
-                Ok((Self::new(source, dest, optype), &rest[2..]))
+                Ok((Self::new(source, dest, optype), 4 + bytes_read))
             }
             (Width::Byte, Sign::Extend) => {
                 let source = Operand::immediate(Value::byte(rest[0]));
-                Ok((Self::new(source, dest, optype), &rest[1..]))
+                Ok((Self::new(source, dest, optype), 3 + bytes_read))
             }
             (Width::Word, Sign::Extend) => {
                 let val = (rest[0] as i8) as i16;
                 let source = Operand::immediate(Value::Word(val));
-                Ok((Self::new(source, dest, optype), &rest[1..]))
+                Ok((Self::new(source, dest, optype), 3 + bytes_read))
             }
         }
     }
 
     /// Tries to decode an Immediate - Accumulator arithemtic operation.
     /// These include ADD, ADC, SUB, SBB, and CMP.
-    pub fn try_decode_im_acc(bytes: &[u8], optype: NumOpType) -> DResult<Self, &[u8]> {
+    pub fn try_decode_im_acc(bytes: &[u8], optype: NumOpType) -> DResult<Self> {
         match Width::parse_byte(bytes[0], 0) {
             Width::Byte => {
                 let dest = Operand::Register(Register::AL);
                 let source = Operand::immediate(Value::byte(bytes[1]));
-                Ok((Self::new(source, dest, optype), &bytes[2..]))
+                Ok((Self::new(source, dest, optype), 2))
             }
             Width::Word => {
                 let dest = Operand::Register(Register::AX);
                 let source = Operand::immediate(Value::word([bytes[1], bytes[2]]));
-                Ok((Self::new(source, dest, optype), &bytes[3..]))
+                Ok((Self::new(source, dest, optype), 3))
                 // Maybe add Value::Signed(i16)
             }
         }

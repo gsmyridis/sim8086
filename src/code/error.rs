@@ -7,4 +7,4 @@ pub enum DecodeError {
     Displacement,
 }
 
-pub type DResult<I, O> = Result<(I, O), DecodeError>;
+pub type DResult<I> = Result<(I, usize), DecodeError>;

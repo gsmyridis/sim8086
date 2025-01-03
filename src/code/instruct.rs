@@ -9,6 +9,7 @@ pub enum Instruction {
     Pop(PopOp),
     Num(NumOp),
     Jump(CondJumpOp),
+    Halt,
 }
 
 impl fmt::Display for Instruction {
@@ -19,6 +20,43 @@ impl fmt::Display for Instruction {
             Self::Pop(op) => write!(f, "{op}"),
             Self::Num(op) => write!(f, "{op}"),
             Self::Jump(op) => write!(f, "{op}"),
+            Self::Halt => write!(f, ""),
         }
+    }
+}
+
+
+#[derive(Debug, Default)]
+pub struct InstructionQueue {
+    inner: Vec<Instruction>,
+    sizes: Vec<usize>,
+    byte_offsets: Vec<usize>,
+    next_offset: usize,
+}
+
+impl InstructionQueue {
+
+    /// Gets the instruction for the specified instruction pointer.
+    pub fn get(&self, ip: usize) -> Option<(&Instruction, &usize)> {
+        let idx = self.byte_offsets
+            .iter()
+            .position(|&offset| offset == ip)?;
+        Some((self.inner.get(idx)?, self.sizes.get(idx)?))
+    }
+
+    /// Appends and instruction to the queue specifying its size.
+    pub fn push(&mut self, instr: Instruction, size: usize) {
+        self.inner.push(instr);
+        self.sizes.push(size);
+        self.byte_offsets.push(self.next_offset);
+        self.next_offset += size;
+    }
+
+    /// Returns the Assembly in its canonical form.
+    pub fn to_string(&self) -> String {
+        self.inner.iter()
+            .map(|i| i.to_string())
+            .collect::<Vec<_>>()
+            .join("\n")
     }
 }

@@ -16,25 +16,25 @@ macro_rules! create_push_pop_op {
 
             impl $op_name {
 
-                pub fn try_decode_rm(bytes: &[u8]) -> DResult<Self, &[u8]> {
+                pub fn try_decode_rm(bytes: &[u8]) -> DResult<Self> {
                     let mode = Mode::try_parse_byte(bytes[1])?;
                     let rm = RM::parse_byte(bytes[1]);
                     let (source, rest) = Operand::register_or_memory(true, &mode, rm.as_u8(), &bytes[2..])?;
                     Ok((Self { source }, rest))
                 }
 
-                pub fn try_decode_reg(bytes: &[u8]) -> DResult<Self, &[u8]> {
+                pub fn try_decode_reg(bytes: &[u8]) -> DResult<Self> {
                     let reg = Reg::parse_byte_low(bytes[0]);
                     let register = Register::from(reg.into(), true);
                     let source = Operand::Register(register);
-                    Ok((Self { source }, &bytes[1..]))
+                    Ok((Self { source }, 1))
                 }
 
-                pub fn try_decode_seg_reg(bytes: &[u8]) -> DResult<Self, &[u8]> {
+                pub fn try_decode_seg_reg(bytes: &[u8]) -> DResult<Self> {
                     let sr = SR::parse_byte(bytes[0]);
                     let segreg = SegmentRegister::try_from(sr.as_u8()).unwrap();
                     let source = Operand::SegmentRegister(segreg);
-                    Ok((Self { source }, &bytes[1..]))
+                    Ok((Self { source }, 1))
                 }
             }
 

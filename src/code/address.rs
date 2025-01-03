@@ -1,6 +1,6 @@
 use std::fmt;
 
-use super::{DecodeError, Mode, Register};
+use super::{DResult, DecodeError, Mode, Register};
 
 #[derive(Debug, PartialEq)]
 pub enum Displacement {
@@ -11,21 +11,20 @@ pub enum Displacement {
 }
 
 impl Displacement {
-    /// Calculates how many bytes it needs to take to read the displacements.
-    pub fn new<'a>(mode: &Mode, rm: u8, bytes: &'a [u8]) -> Result<(Self, &'a [u8]), DecodeError> {
+    pub fn new(mode: &Mode, rm: u8, bytes: &[u8]) -> DResult<Self> {
         match mode {
             Mode::Memory => {
                 if rm == 0b110 {
                     let addr = u16::from_le_bytes([bytes[0], bytes[1]]);
-                    Ok((Displacement::NoneDirect(addr), &bytes[2..]))
+                    Ok((Displacement::NoneDirect(addr), 2))
                 } else {
-                    Ok((Displacement::None, bytes))
+                    Ok((Displacement::None, 0))
                 }
             }
-            Mode::Memory8 => Ok((Displacement::Byte(bytes[0] as i8), &bytes[1..])),
+            Mode::Memory8 => Ok((Displacement::Byte(bytes[0] as i8), 1)),
             Mode::Memory16 => {
                 let addr = i16::from_le_bytes([bytes[0], bytes[1]]);
-                Ok((Displacement::Word(addr), &bytes[2..]))
+                Ok((Displacement::Word(addr), 2))
             }
             Mode::Register => Err(DecodeError::Displacement),
         }

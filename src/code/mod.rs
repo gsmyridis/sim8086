@@ -11,12 +11,12 @@ pub mod fields;
 pub use fields::*;
 
 pub mod operand;
-pub use operand::{get_operands, Operand, Value};
+pub use operand::{get_operands, Operand};
 
 pub mod ops;
 
 pub mod instruct;
-pub use instruct::Instruction;
+pub use instruct::{Instruction, InstructionQueue};
 
 pub mod decode;
 pub use decode::Decoder;
