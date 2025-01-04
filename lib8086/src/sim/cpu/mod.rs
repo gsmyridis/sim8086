@@ -208,6 +208,7 @@ impl fmt::Display for Cpu {
         writeln!(f, "\n{}", self.flags)?;
         writeln!(f, "{}", self.gen_regs)?;
         writeln!(f, "{}", self.seg_regs)?;
+        writeln!(f, "- IP: {:04x}", self.ip)?;
         Ok(())
     }
 }
