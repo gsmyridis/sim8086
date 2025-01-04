@@ -120,3 +120,18 @@ fn test_memory_movs() {
     assert_eq!(cpu.gen_regs.bp, 0x0004u16.to_le_bytes());
     assert_eq!(cpu.ip, 0x0030u16);
 }
+
+#[test]
+fn test_memory_num_loop() {
+    let cpu = execute_test_file("test_memory_num_loop");
+
+    assert_eq!(cpu.gen_regs.bx, 0x0006u16.to_le_bytes());
+    assert_eq!(cpu.gen_regs.cx, 0x0004u16.to_le_bytes());
+    assert_eq!(cpu.gen_regs.dx, 0x0006u16.to_le_bytes());
+    assert_eq!(cpu.gen_regs.bp, 0x03e8u16.to_le_bytes());
+    assert_eq!(cpu.gen_regs.si, 0x0006u16.to_le_bytes());
+    assert_eq!(cpu.ip, 0x0023);
+
+    assert!(cpu.flags.parity);
+    assert!(cpu.flags.zero);
+}
