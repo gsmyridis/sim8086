@@ -11,6 +11,11 @@ pub enum Displacement {
 }
 
 impl Displacement {
+    /// It creates a new `Displacement` from specified `Mode` and `RM` fields,
+    /// as well as the remaining byte-code stream.
+    ///
+    /// The method returns the `Displacement` as well as the number of bytes that
+    /// were read from the byte-code stream.
     pub fn new(mode: &Mode, rm: u8, bytes: &[u8]) -> DResult<Self> {
         match mode {
             Mode::Memory => {
@@ -30,13 +35,15 @@ impl Displacement {
         }
     }
 
-    /// Returns the displacement value as 32-bit integer value.
+    /// Returns the displacement value as 16-bit signed integer value.
+    ///
+    /// If the displacement is `NoneDirect`, then the displacement is `None`.
     pub fn value(&self) -> Option<i16> {
         match self {
             Self::None => Some(0i16),
             Self::NoneDirect(_) => None,
             Self::Byte(val) => Some(*val as i16),
-            Self::Word(val) => Some(*val as i16),
+            Self::Word(val) => Some(*val),
         }
     }
 }
@@ -44,21 +51,15 @@ impl Displacement {
 impl fmt::Display for Displacement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::NoneDirect(val) => write!(f, " + {val}"),
-            Self::Word(val) => {
-                if *val < 0 {
-                    write!(f, " - {}", -val)
-                } else {
-                    write!(f, " + {val}")
-                }
+            Self::NoneDirect(v) => write!(f, " + {v}"),
+            Self::Word(v) => {
+                let sign = if *v < 0 { '-' } else { '+' };
+                write!(f, " {sign} {}", v.abs())
             }
-            Self::Byte(val) => {
-                let val = *val as i16;
-                if val < 0 {
-                    write!(f, " - {}", -val)
-                } else {
-                    write!(f, " + {val}")
-                }
+            Self::Byte(v) => {
+                let v = (*v as i16).abs();
+                let sign = if v < 0 { '-' } else { '+' };
+                write!(f, " {sign} {v}")
             }
             Self::None => write!(f, ""),
         }

@@ -60,10 +60,10 @@ impl Value {
     }
 
     /// Returns the inner value as a 16-bit integer.
-    pub fn inner(&self) -> i16 {
+    pub fn as_u16(&self) -> u16 {
         match self {
-            Self::Byte(v) => *v as i16,
-            Self::Word(v) => *v,
+            Self::Byte(v) => *v as u16,
+            Self::Word(v) => *v as u16,
         }
     }
 

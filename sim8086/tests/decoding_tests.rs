@@ -1,7 +1,7 @@
 use std::io::Read;
+use std::path::Path;
 use std::process::Command;
 use std::sync::OnceLock;
-use std::path::Path;
 
 use tempdir::TempDir;
 
@@ -26,15 +26,15 @@ fn test_decode() {
 
     let manifest_path = Path::new(env!("CARGO_MANIFEST_DIR"));
     let dir_path = manifest_path.join("tests/data/decode");
-    let dir = std::fs::read_dir(dir_path)
-        .expect("You must run the tests from the repo's base directory");
+    let dir =
+        std::fs::read_dir(dir_path).expect("You must run the tests from the repo's base directory");
     let temp_dir = TempDir::new("output").expect("Failed to create temporary directory");
 
     for entry in dir {
         let entry = entry.expect("Failed to unwrap DirEntry");
         let bin_path = entry.path();
         let bin_filename = bin_path.file_name().expect("Entry is not directory");
-        if !bin_filename.to_string_lossy().starts_with("test"){
+        if !bin_filename.to_string_lossy().starts_with("test") {
             continue;
         }
         let mut asm_path = temp_dir.path().join(bin_filename);
