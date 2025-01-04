@@ -51,7 +51,8 @@ impl InstructionQueue {
 
 impl fmt::Display for InstructionQueue {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let asm = self.inner
+        let asm = self
+            .inner
             .iter()
             .map(|i| i.to_string())
             .collect::<Vec<_>>()

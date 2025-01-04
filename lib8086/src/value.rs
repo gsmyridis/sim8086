@@ -59,6 +59,14 @@ impl Value {
         }
     }
 
+    /// Returns the inner value as a 16-bit integer.
+    pub fn inner(&self) -> i16 {
+        match self {
+            Self::Byte(v) => *v as i16,
+            Self::Word(v) => *v,
+        }
+    }
+
     /// Subtracts two values returning the result along with the overflow, carry and
     /// auxiliary carry flags.
     pub fn flagged_sub(&self, other: &Value) -> (Value, bool, bool, bool) {

@@ -17,8 +17,8 @@ pub enum Register {
     CX, // Word of C register.
     DX, // Word of D register.
     SP, // Stack Pointer
-    BP, //
-    SI, //
+    BP, // Basis Pointer
+    SI, // 
     DI, //
 }
 

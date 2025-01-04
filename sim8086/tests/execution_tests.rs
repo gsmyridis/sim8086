@@ -85,3 +85,38 @@ fn test_ip_reg() {
     assert_eq!(cpu.gen_regs.cx, 0xfce0u16.to_le_bytes());
     assert_eq!(cpu.ip, 0x000eu16);
 }
+
+#[test]
+fn test_cond_jumps_1() {
+    let cpu = execute_test_file("test_cond_jumps_1");
+
+    assert_eq!(cpu.gen_regs.bx, 0x0406u16.to_le_bytes());
+    assert_eq!(cpu.ip, 0x000eu16);
+
+    assert!(cpu.flags.zero);
+    assert!(cpu.flags.parity);
+}
+
+// #[test]
+// fn test_cond_jumps_2() {
+//     let cpu = execute_test_file("test_cond_jumps_2");
+// 
+//     assert_eq!(cpu.gen_regs.ax, 0x000du16.to_le_bytes());
+//     assert_eq!(cpu.gen_regs.bx, 0xfffbu16.to_le_bytes());
+//     assert_eq!(cpu.ip, 0x001cu16);
+// 
+//     assert!(cpu.flags.carry);
+//     assert!(cpu.flags.aux_carry);
+//     assert!(cpu.flags.sign);
+// }
+
+#[test]
+fn test_memory_movs() {
+    let cpu = execute_test_file("test_memory_movs");
+
+    assert_eq!(cpu.gen_regs.bx, 0x0001u16.to_le_bytes());
+    assert_eq!(cpu.gen_regs.cx, 0x0002u16.to_le_bytes());
+    assert_eq!(cpu.gen_regs.dx, 0x000au16.to_le_bytes());
+    assert_eq!(cpu.gen_regs.bp, 0x0004u16.to_le_bytes());
+    assert_eq!(cpu.ip, 0x0030u16);
+}

@@ -29,6 +29,16 @@ impl Displacement {
             Mode::Register => Err(DecodeError::Displacement),
         }
     }
+
+    /// Returns the displacement value as 32-bit integer value.
+    pub fn value(&self) -> Option<i16> {
+        match self {
+            Self::None => Some(0i16),
+            Self::NoneDirect(_) => None,
+            Self::Byte(val) => Some(*val as i16),
+            Self::Word(val) => Some(*val as i16),
+        }
+    }
 }
 
 impl fmt::Display for Displacement {
