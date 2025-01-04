@@ -8,7 +8,7 @@ pub enum Instruction {
     Push(PushOp),
     Pop(PopOp),
     Num(NumOp),
-    Jump(CondJumpOp),
+    CondJump(CondJumpOp),
     Halt,
 }
 
@@ -19,7 +19,7 @@ impl fmt::Display for Instruction {
             Self::Push(op) => write!(f, "{op}"),
             Self::Pop(op) => write!(f, "{op}"),
             Self::Num(op) => write!(f, "{op}"),
-            Self::Jump(op) => write!(f, "{op}"),
+            Self::CondJump(op) => write!(f, "{op}"),
             Self::Halt => write!(f, ""),
         }
     }

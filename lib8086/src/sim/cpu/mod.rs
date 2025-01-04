@@ -47,7 +47,7 @@ impl Cpu {
                 Instruction::Push(_op) => todo!(),
                 Instruction::Pop(_op) => todo!(),
                 Instruction::Num(op) => self.execute_numeric(op),
-                Instruction::Jump(_op) => todo!(),
+                Instruction::CondJump(_op) => todo!(),
                 Instruction::Halt => break,
             }?
         }
@@ -196,7 +196,7 @@ impl Cpu {
     }
 
     /// Executes a JUMP instruction.
-    fn exec_jump(&mut self, _op: CondJumpOp) -> Result<(), ()> {
+    fn exec_conditional_jump(&mut self, _op: CondJumpOp) -> Result<(), ()> {
         // Check flags
         // Jump in instruction buffer
         todo!()
