@@ -16,7 +16,8 @@ pub enum NumOpType {
 impl NumOpType {
     fn try_parse_byte(byte: u8) -> Result<Self, DecodeError> {
         match (byte >> 3) & 0b111 {
-            0b000 => Ok(Self::Add), 0b010 => Ok(Self::Adc),
+            0b000 => Ok(Self::Add),
+            0b010 => Ok(Self::Adc),
             0b101 => Ok(Self::Sub),
             0b011 => Ok(Self::Sbb),
             0b111 => Ok(Self::Cmp),
@@ -84,7 +85,8 @@ impl NumOp {
         let reg = Reg::parse_byte_mid(bytes[1]);
         let rm = RM::parse_byte(bytes[1]);
 
-        let ((source, dest), bytes_read) = get_operands(mode, direction, width, reg, rm, &bytes[2..])?;
+        let ((source, dest), bytes_read) =
+            get_operands(mode, direction, width, reg, rm, &bytes[2..])?;
         Ok((Self::new(source, dest, optype), bytes_read + 2))
     }
 

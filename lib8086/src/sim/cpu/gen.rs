@@ -1,17 +1,17 @@
-use std::fmt;
 use crate::code::Register;
 use crate::value::Value;
+use std::fmt;
 
 #[derive(Debug, Default)]
 pub struct GeneralRegisters {
-    ax: [u8; 2],
-    bx: [u8; 2],
-    cx: [u8; 2],
-    dx: [u8; 2],
-    sp: [u8; 2],
-    bp: [u8; 2],
-    si: [u8; 2],
-    di: [u8; 2],
+    pub ax: [u8; 2],
+    pub bx: [u8; 2],
+    pub cx: [u8; 2],
+    pub dx: [u8; 2],
+    pub sp: [u8; 2],
+    pub bp: [u8; 2],
+    pub si: [u8; 2],
+    pub di: [u8; 2],
 }
 
 impl GeneralRegisters {

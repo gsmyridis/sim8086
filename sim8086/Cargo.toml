@@ -1,0 +1,11 @@
+[package]
+name = "sim8086"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+lib8086 = { path = "../lib8086" }
+clap = { version = "4.5.23", features = ["derive"] }
+
+[dev-dependencies]
+tempdir = "0.3.7"

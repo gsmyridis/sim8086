@@ -1,7 +1,9 @@
 use std::fmt;
 
 use crate::code::fields::*;
-use crate::code::{get_bit, get_operands, DResult, EffectiveAddr, Operand, Register, SegmentRegister};
+use crate::code::{
+    get_bit, get_operands, DResult, EffectiveAddr, Operand, Register, SegmentRegister,
+};
 use crate::value::Value;
 
 #[derive(Debug)]
@@ -27,7 +29,8 @@ impl MovOp {
         let reg = Reg::parse_byte_mid(bytes[1]);
         let rm = RM::parse_byte(bytes[1]);
 
-        let ((source, dest), bytes_read) = get_operands(mode, direction, width, reg, rm, &bytes[2..])?;
+        let ((source, dest), bytes_read) =
+            get_operands(mode, direction, width, reg, rm, &bytes[2..])?;
         Ok((MovOp::new(source, dest), 2 + bytes_read))
     }
 

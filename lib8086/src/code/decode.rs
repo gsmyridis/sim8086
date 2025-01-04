@@ -6,7 +6,6 @@ pub struct Decoder {
     buffer: Vec<u8>,
 }
 
-
 impl Decoder {
     pub fn new(buffer: Vec<u8>) -> Self {
         Self { buffer }
@@ -97,66 +96,32 @@ impl Decoder {
                 let (op, size) = NumOp::try_decode_im_acc(bytes, NumOpType::Cmp)?;
                 Ok((Instruction::Num(op), size))
             }
-            JumpEqual => Ok((
-                Instruction::Jump(CondJumpOp::Equal(bytes[1] as i8)), 2
-            )),
-            JumpLess => Ok((
-                Instruction::Jump(CondJumpOp::Less(bytes[1] as i8)), 2
-            )),
-            JumpLessEq => Ok((
-                Instruction::Jump(CondJumpOp::LessEqual(bytes[1] as i8)), 2
-            )),
-            JumpBelow => Ok((
-                Instruction::Jump(CondJumpOp::Below(bytes[1] as i8)), 2
-            )),
-            JumpBelowEq => Ok((
-                Instruction::Jump(CondJumpOp::BelowEqual(bytes[1] as i8)), 2
-            )),
-            JumpParityEven => Ok((
-                Instruction::Jump(CondJumpOp::ParityEven(bytes[1] as i8)), 2
-            )),
-            JumpOverflow => Ok((
-                Instruction::Jump(CondJumpOp::Overflow(bytes[1] as i8)), 2
-            )),
-            JumpNEqual => Ok((
-                Instruction::Jump(CondJumpOp::NotEqual(bytes[1] as i8)), 2
-            )),
-            JumpSign => Ok((
-                Instruction::Jump(CondJumpOp::Sign(bytes[1] as i8)), 2
-            )),
+            JumpEqual => Ok((Instruction::Jump(CondJumpOp::Equal(bytes[1] as i8)), 2)),
+            JumpLess => Ok((Instruction::Jump(CondJumpOp::Less(bytes[1] as i8)), 2)),
+            JumpLessEq => Ok((Instruction::Jump(CondJumpOp::LessEqual(bytes[1] as i8)), 2)),
+            JumpBelow => Ok((Instruction::Jump(CondJumpOp::Below(bytes[1] as i8)), 2)),
+            JumpBelowEq => Ok((Instruction::Jump(CondJumpOp::BelowEqual(bytes[1] as i8)), 2)),
+            JumpParityEven => Ok((Instruction::Jump(CondJumpOp::ParityEven(bytes[1] as i8)), 2)),
+            JumpOverflow => Ok((Instruction::Jump(CondJumpOp::Overflow(bytes[1] as i8)), 2)),
+            JumpNEqual => Ok((Instruction::Jump(CondJumpOp::NotEqual(bytes[1] as i8)), 2)),
+            JumpSign => Ok((Instruction::Jump(CondJumpOp::Sign(bytes[1] as i8)), 2)),
             JumpGreaterEq => Ok((
-                Instruction::Jump(CondJumpOp::GreaterEqual(bytes[1] as i8)), 2
+                Instruction::Jump(CondJumpOp::GreaterEqual(bytes[1] as i8)),
+                2,
             )),
-            JumpGreater => Ok((
-                Instruction::Jump(CondJumpOp::Greater(bytes[1] as i8)), 2
-            )),
-            JumpAboveEq => Ok((
-                Instruction::Jump(CondJumpOp::AboveEqual(bytes[1] as i8)), 2
-            )),
-            JumpAbove => Ok((
-                Instruction::Jump(CondJumpOp::Above(bytes[1] as i8)), 2
-            )),
-            JumpParityOdd => Ok((
-                Instruction::Jump(CondJumpOp::ParityOdd(bytes[1] as i8)), 2
-            )),
+            JumpGreater => Ok((Instruction::Jump(CondJumpOp::Greater(bytes[1] as i8)), 2)),
+            JumpAboveEq => Ok((Instruction::Jump(CondJumpOp::AboveEqual(bytes[1] as i8)), 2)),
+            JumpAbove => Ok((Instruction::Jump(CondJumpOp::Above(bytes[1] as i8)), 2)),
+            JumpParityOdd => Ok((Instruction::Jump(CondJumpOp::ParityOdd(bytes[1] as i8)), 2)),
             JumpNOverflow => Ok((
-                Instruction::Jump(CondJumpOp::NotOverflow(bytes[1] as i8)), 2
+                Instruction::Jump(CondJumpOp::NotOverflow(bytes[1] as i8)),
+                2,
             )),
-            JumpNSign => Ok((
-                Instruction::Jump(CondJumpOp::NotSign(bytes[1] as i8)), 2
-            )),
-            Loop => Ok((
-                Instruction::Jump(CondJumpOp::Loop(bytes[1] as i8)), 2
-            )),
-            LoopEqual => Ok((
-                Instruction::Jump(CondJumpOp::LoopEqual(bytes[1] as i8)), 2
-            )),
-            LoopNEqual => Ok((
-                Instruction::Jump(CondJumpOp::LoopNEqual(bytes[1] as i8)), 2
-            )),
-            JumpCXZero => Ok((
-                Instruction::Jump(CondJumpOp::CXZero(bytes[1] as i8)), 2
-            )),
+            JumpNSign => Ok((Instruction::Jump(CondJumpOp::NotSign(bytes[1] as i8)), 2)),
+            Loop => Ok((Instruction::Jump(CondJumpOp::Loop(bytes[1] as i8)), 2)),
+            LoopEqual => Ok((Instruction::Jump(CondJumpOp::LoopEqual(bytes[1] as i8)), 2)),
+            LoopNEqual => Ok((Instruction::Jump(CondJumpOp::LoopNEqual(bytes[1] as i8)), 2)),
+            JumpCXZero => Ok((Instruction::Jump(CondJumpOp::CXZero(bytes[1] as i8)), 2)),
             PushRegRM => {
                 let (op, size) = PushOp::try_decode_rm(bytes)?;
                 Ok((Instruction::Push(op), size))

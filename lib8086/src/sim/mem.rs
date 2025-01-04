@@ -10,9 +10,8 @@ impl Memory {
     pub fn set(&mut self, addr: &EffectiveAddr, val: Value) {
         todo!()
     }
-    
+
     pub fn get(&self, addr: &EffectiveAddr) -> Value {
         todo!()
     }
 }
-

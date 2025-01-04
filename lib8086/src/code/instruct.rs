@@ -25,7 +25,6 @@ impl fmt::Display for Instruction {
     }
 }
 
-
 #[derive(Debug, Default)]
 pub struct InstructionQueue {
     inner: Vec<Instruction>,
@@ -35,12 +34,9 @@ pub struct InstructionQueue {
 }
 
 impl InstructionQueue {
-
     /// Gets the instruction for the specified instruction pointer.
     pub fn get(&self, ip: usize) -> Option<(&Instruction, &usize)> {
-        let idx = self.byte_offsets
-            .iter()
-            .position(|&offset| offset == ip)?;
+        let idx = self.byte_offsets.iter().position(|&offset| offset == ip)?;
         Some((self.inner.get(idx)?, self.sizes.get(idx)?))
     }
 
@@ -51,12 +47,15 @@ impl InstructionQueue {
         self.byte_offsets.push(self.next_offset);
         self.next_offset += size;
     }
+}
 
-    /// Returns the Assembly in its canonical form.
-    pub fn to_string(&self) -> String {
-        self.inner.iter()
+impl fmt::Display for InstructionQueue {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let asm = self.inner
+            .iter()
             .map(|i| i.to_string())
             .collect::<Vec<_>>()
-            .join("\n")
+            .join("\n");
+        write!(f, "{asm}")
     }
 }

@@ -6,7 +6,6 @@ use super::{
 };
 use crate::value::Value;
 
-
 /// A struct representing an instruction operand.
 ///
 /// Instructions have one or two operands, each one being either, a register,
@@ -39,12 +38,7 @@ impl Operand {
     }
 
     /// Creates a register or memory operand.
-    pub fn register_or_memory<'a>(
-        width: bool,
-        mode: &Mode,
-        rm: u8,
-        bytes: &[u8],
-    ) -> DResult<Self> {
+    pub fn register_or_memory(width: bool, mode: &Mode, rm: u8, bytes: &[u8]) -> DResult<Self> {
         match mode {
             Mode::Register => Ok((Operand::register(rm, width), 0)),
             _ => {

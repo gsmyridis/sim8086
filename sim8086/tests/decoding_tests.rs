@@ -1,4 +1,5 @@
 use std::io::Read;
+use std::path::Path;
 use std::process::Command;
 use std::sync::OnceLock;
 
@@ -23,25 +24,32 @@ fn ensure_nasm_installed() {
 fn test_decode() {
     ensure_nasm_installed();
 
-    let dir = std::fs::read_dir("tests/data/")
-        .expect("You must run the tests from the repo's base directory");
+    let manifest_path = Path::new(env!("CARGO_MANIFEST_DIR"));
+
+    let dir_path = manifest_path.join("tests/data/decode");
+    let dir =
+        std::fs::read_dir(dir_path).expect("You must run the tests from the repo's base directory");
     let temp_dir = TempDir::new("output").expect("Failed to create temporary directory");
 
     for entry in dir {
         let entry = entry.expect("Failed to unwrap DirEntry");
         let bin_path = entry.path();
         let bin_filename = bin_path.file_name().expect("Entry is not directory");
+        if !bin_filename.to_string_lossy().starts_with("test") {
+            continue;
+        }
         let mut asm_path = temp_dir.path().join(bin_filename);
         asm_path.set_extension("asm");
 
         // Decode byte-code with sim8086 decode.
-        let status = Command::new("target/debug/sim8086")
+        let decoder_path = manifest_path.join("../target/debug/sim8086");
+        let status = Command::new(decoder_path.as_os_str())
             .arg("decode")
             .arg("--output")
             .arg(asm_path.as_os_str())
             .arg(entry.path().as_os_str())
             .status()
-            .expect("Failed to get status");
+            .expect("Failed to get status from decoder.");
         assert!(
             status.success(),
             "Failed to execute the `sim8086 decode` command."

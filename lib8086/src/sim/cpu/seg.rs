@@ -5,10 +5,10 @@ use crate::value::Value;
 
 #[derive(Debug, Default)]
 pub struct SegmentRegisters {
-    es: [u8; 2],
-    cs: [u8; 2],
-    ss: [u8; 2],
-    ds: [u8; 2],
+    pub es: [u8; 2],
+    pub cs: [u8; 2],
+    pub ss: [u8; 2],
+    pub ds: [u8; 2],
 }
 
 impl SegmentRegisters {
@@ -52,10 +52,9 @@ impl fmt::Display for SegmentRegisters {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
-    
+
     use super::*;
     use crate::code::SegmentRegister;
     use crate::value::Value;

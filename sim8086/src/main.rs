@@ -4,13 +4,7 @@ use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
 
-mod code;
-use code::{DecodeError, Decoder};
-
-mod sim;
-mod value;
-
-use sim::Cpu;
+use lib8086::{Cpu, DecodeError, Decoder};
 
 #[derive(Parser)]
 struct Cli {

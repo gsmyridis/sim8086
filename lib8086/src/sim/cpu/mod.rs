@@ -1,5 +1,5 @@
-use std::fmt;
 use std::cmp::Ordering;
+use std::fmt;
 
 mod seg;
 use seg::SegmentRegisters;
@@ -10,27 +10,24 @@ use gen::GeneralRegisters;
 mod flags;
 use flags::Flags;
 
-use crate::code::{Operand, ops::*, Instruction, InstructionQueue};
+use crate::code::{ops::*, Instruction, InstructionQueue, Operand};
 use crate::value::Value;
 
-use super::{EResult, ExecutionError, mem::Memory};
-
-
+use super::{mem::Memory, EResult, ExecutionError};
 
 #[derive(Debug, Default)]
 pub struct Cpu {
     // Execution Unit (EU)
-    gen_regs: GeneralRegisters,
-    flags: Flags,
+    pub gen_regs: GeneralRegisters,
+    pub flags: Flags,
 
     // Bus Interface Unit (BIU)
-    seg_regs: SegmentRegisters,
-    ip: usize,
-    mem: Memory,
+    pub seg_regs: SegmentRegisters,
+    pub ip: u16,
+    pub mem: Memory,
 }
 
 impl Cpu {
-
     /// Creates a new default CPU.
     pub fn new() -> Self {
         Self::default()
@@ -39,8 +36,10 @@ impl Cpu {
     pub fn execute(&mut self, iqueue: &InstructionQueue) -> EResult<()> {
         loop {
             // Fetch next instruction
-            let (instr, offset) = iqueue.get(self.ip).ok_or(ExecutionError::InstructionOffset)?;
-            self.ip += offset;
+            let (instr, offset) = iqueue
+                .get(self.ip as usize)
+                .ok_or(ExecutionError::InstructionOffset)?;
+            self.ip += *offset as u16;
 
             // Execute instruction
             match instr {
@@ -87,10 +86,10 @@ impl Cpu {
         }
     }
 
-    /// Sets the value of the destination operand, and updates the Zero, Sign, 
+    /// Sets the value of the destination operand, and updates the Zero, Sign,
     /// Parity status flags.
     ///
-    /// If the 
+    /// If the
     fn set_operand_value(&mut self, dest: &Operand, val: Value) -> EResult<()> {
         self.set_flags_from_val(&val);
         match dest {
@@ -116,8 +115,8 @@ impl Cpu {
                 source,
                 destination,
             } => {
-                let sval = self.get_operand_value(&source);
-                let dval = self.get_destination_value(&destination)?;
+                let sval = self.get_operand_value(source);
+                let dval = self.get_destination_value(destination)?;
 
                 let (val, overflowed, carry, aux_carry) = dval.flagged_add(&sval);
                 self.flags.overflow = overflowed;
@@ -125,7 +124,7 @@ impl Cpu {
                 self.flags.aux_carry = aux_carry;
 
                 println!("add {destination} {source} -> {destination} {val}");
-                self.set_operand_value(&destination, val)
+                self.set_operand_value(destination, val)
             }
             NumOp::Adc {
                 source,
@@ -137,8 +136,8 @@ impl Cpu {
                 source,
                 destination,
             } => {
-                let sval = self.get_operand_value(&source);
-                let dval = self.get_destination_value(&destination)?;
+                let sval = self.get_operand_value(source);
+                let dval = self.get_destination_value(destination)?;
 
                 let (val, overflowed, carry, aux_carry) = dval.flagged_sub(&sval);
                 self.flags.overflow = overflowed;
@@ -146,7 +145,7 @@ impl Cpu {
                 self.flags.aux_carry = aux_carry;
 
                 println!("sub {destination} {source} -> {destination} {val}");
-                self.set_operand_value(&destination, val)
+                self.set_operand_value(destination, val)
             }
             NumOp::Sbb {
                 source,
@@ -158,23 +157,23 @@ impl Cpu {
                 source,
                 destination,
             } => {
-                let sval = self.get_operand_value(&source);
-                let dval = self.get_destination_value(&destination)?;
+                let sval = self.get_operand_value(source);
+                let dval = self.get_destination_value(destination)?;
                 let ord = dval.cmp(&sval);
                 match ord {
                     Ordering::Equal => {
                         self.flags.zero = true;
                         self.flags.parity = true;
                         self.flags.sign = false;
-                    },
+                    }
                     Ordering::Greater => {
                         self.flags.zero = false;
                         self.flags.sign = false;
-                    },
+                    }
                     Ordering::Less => {
                         self.flags.zero = false;
                         self.flags.sign = true;
-                    },
+                    }
                 }
                 println!("cmp {destination}, {source}");
                 Ok(())
@@ -196,7 +195,6 @@ impl Cpu {
         todo!()
     }
 
-
     /// Executes a JUMP instruction.
     fn exec_jump(&mut self, _op: CondJumpOp) -> Result<(), ()> {
         // Check flags
@@ -204,9 +202,6 @@ impl Cpu {
         todo!()
     }
 }
-
-
-
 
 impl fmt::Display for Cpu {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

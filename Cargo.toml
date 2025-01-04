@@ -1,10 +1,7 @@
-[package]
-name = "sim8086"
-version = "0.1.0"
-edition = "2021"
+[workspace]
+members = [
+    "lib8086",
+    "sim8086",
+]
 
-[dependencies]
-clap = { version = "4.5.23", features = ["derive"] }
-
-[dev-dependencies]
-tempdir = "0.3.7"
+resolver = "2"

@@ -44,7 +44,7 @@ impl Value {
         }
     }
 
-    /// Adds two values returning the result along with the overflow, carry and 
+    /// Adds two values returning the result along with the overflow, carry and
     /// auxiliary carry flags.
     pub fn flagged_add(&self, other: &Value) -> (Value, bool, bool, bool) {
         match (self, other) {
@@ -53,13 +53,13 @@ impl Value {
                 let (_, carry) = (*v1 as u16).overflowing_add(*v2 as u16);
                 let aux_carry = (*v1 & 0xF) + (*v2 & 0xF) > 0xF;
                 (Self::Word(val), ov, carry, aux_carry)
-            },
+            }
             (Self::Byte(v1), Self::Byte(v2)) => todo!(),
             _ => panic!("Overflowing add has been implemented only for word-word."),
         }
     }
 
-    /// Subtracts two values returning the result along with the overflow, carry and 
+    /// Subtracts two values returning the result along with the overflow, carry and
     /// auxiliary carry flags.
     pub fn flagged_sub(&self, other: &Value) -> (Value, bool, bool, bool) {
         match (self, other) {
@@ -68,7 +68,7 @@ impl Value {
                 let carry = (*v1 as u16) < (*v2 as u16);
                 let aux_carry = (*v1 & 0xF) < (*v2 & 0xF);
                 (Self::Word(val), ov, carry, aux_carry)
-            },
+            }
             (Self::Byte(v1), Self::Byte(v2)) => todo!(),
             _ => panic!("Overflowing sub has been implemented only for word-word."),
         }
@@ -89,7 +89,6 @@ impl Value {
         val_self.cmp(&val_other)
     }
 }
-
 
 impl fmt::Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
