@@ -3,11 +3,16 @@
 
 This project is primarily educational: to write efficient software, it helps to understand how the CPU operates at a low level. 
 By reading and analyzing assembly, you can spot any inefficiencies or “waste” in your program. 
-sim8086 provides an introduction to these concepts, and the accompanying instruction manual serves as a handy reference.
+sim8086 provides an introduction to these concepts, and the accompanying
+[instruction manual](https://edge.edx.org/c4x/BITSPilani/EEE231/asset/8086_family_Users_Manual_1_.pdf)
+serves as a handy reference.
 
 Although sim8086 does not yet implement every single 8086 instruction, it covers most of them well enough to handle typical programs of moderate complexity. 
-I encourage you to consult the instruction manual and consider contributing to improve and extend the simulator.
+I encourage you to consult the
+[instruction manual](https://edge.edx.org/c4x/BITSPilani/EEE231/asset/8086_family_Users_Manual_1_.pdf)
+and consider contributing to improve and extend the simulator.
 For all instruction for which decoding and execution has been implemented, there are accompanying tests in `sim8086/tests/`.
+
 
 ## Installation
 
