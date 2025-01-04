@@ -46,6 +46,9 @@ fn main() -> Result<(), DecodeError> {
             let mut cpu = Cpu::new();
             cpu.execute(&iqueue).unwrap();
 
+            println!("\nINSTRUCTIONS");
+            println!("-------------------");
+            println!("{iqueue}");
             println!("{cpu}");
         }
     }
