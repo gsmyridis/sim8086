@@ -1,43 +1,42 @@
-# `sim8086` 
+# `sim8086`
+**sim8086** is a lightweight simulator for the 8086 family of Intel processors, built to decode raw machine code into 8086 Assembly and emulate execution as it would occur on real hardware.
 
-#
+This project is primarily educational: to write efficient software, it helps to understand how the CPU operates at a low level. 
+By reading and analyzing assembly, you can spot any inefficiencies or “waste” in your program. 
+sim8086 provides an introduction to these concepts, and the accompanying instruction manual serves as a handy reference.
 
-The 8086 are third-generation processors. 
-Mircroprocessors generally execute a program by repeatedly cycling through the simplified steps below:
+Although sim8086 does not yet implement every single 8086 instruction, it covers most of them well enough to handle typical programs of moderate complexity. 
+I encourage you to consult the instruction manual and consider contributing to improve and extend the simulator.
+For all instruction for which decoding and execution has been implemented, there are accompanying tests in `sim8086/tests/`.
 
-1. Fetch the next instruction from memory.
-2. Read an operand (if required by the instruction).
-3. Execute the instruction.
-4. Write the result (if required by the instruction).
+## Installation
 
-In CPUs prior to 8086, most of these steps have been performed serially, or with only a single bus cycle fetch overlap.
-The architecture of the 8086, while performing the same steps, allocates them to two separate processing units within the CPU.
-The execution unit (EU) executes instructions, and the bus interface unit (BUI) fetches instructions, reads operands and writes results. 
+To install sim8086 clone this repository and build it with `cargo` either in `debug` or `release` mode.
+```
+git clone https://github.com/gsmyridis/sim8086.git
+cd sim8086
+cargo build --release
+```
+The binary is then located in `target/debug/sim8086` or `target/release/sim8086` depending on the build mode.
 
-### Execution Unit
+## Usage
 
-A 16-bit arithmetic/logic unit (ALU) in the EU maintains the CPU status and control flags, and manipulates the general registers and instruction operands. 
-All registers and data paths in the EU are 16 bits wide for fast internal transfers.
+sim8086 has two main commands: `decode` and `execute`.
 
-The EU has no connection on the system bus. It obtains instructions from a queue maintained by the BIU. 
-Likewise, when an instruction requires access to memory or to a peripheral device, the EU requests the BIU to obtain or store the data.
-All addresses manipulated by the EU are 16 bits wide.
-The BIU, however, performs an address relocation that gives the EU access to the full megabyte of memory space.
+### Decoding
 
-### Bus Interface Unit
+The `decode` command reads a byte-code file (raw 8086 machine code) and produces an Assembly listing.
+```
+sim8086 decode <OUTPUT> <INPUT>
+```
+- `<OUTPUT>`: Path to the file where the resulting Assembly code will be written.
+- `<INPUT>`: The path to the binary file containing the 8086 machine code.
 
-The BIU performs all bus operations for the EU.
-Data is transferred between the CPU and memory or I/O devices upon demand from the EU. 
+### Executing
 
-### General Registers
-
-Registers are subdivided into two sets of four registers each: the data registers (sometimes called the H&L group for "high" and "low"), and the pointer and index registers (sometimes called the P&I group).
-
-The data registers are unique in that their upper (high) and lower halves are separately addressable.
-This means that each data register can be used interchangeably as a 16-bit register, or as two 8-bit registers.
-The other CPU registers always are accessed as 16-bit units only. 
-The data registers can be used without constraint in most arithmetic and logic operations.
-In addition, some instructions use certain registers implicitly thus allowing compact yet powerful encoding.
-
-The pointer and index registers can also participate in most arithmetic and logic operations.
-In fact, all eight general registers fit the definition of "accumulator" as used in first and s
+The `execute` command runs the 8086 machine code under the simulator, allowing you to see the program’s behavior.
+In `STDOUT` you will see the 8086 Assembly code along with the final state of the CPU.
+```
+sim8086 execute <INPUT>
+```
+- `<INPUT>`: The path to the binary file containing the 8086 machine code to simulate.
