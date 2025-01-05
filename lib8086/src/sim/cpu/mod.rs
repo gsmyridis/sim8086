@@ -14,7 +14,7 @@ use super::{EResult, ExecutionError};
 use crate::code::{ops::*, EffectiveAddr, Instruction, InstructionQueue, Operand};
 use crate::value::Value;
 
-const MEM_SIZE: usize = 1024;
+const MEM_SIZE: usize = 64 * 1024;
 
 #[derive(Debug)]
 pub struct Cpu {
