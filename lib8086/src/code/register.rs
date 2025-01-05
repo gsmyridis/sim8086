@@ -4,18 +4,18 @@ use super::DecodeError;
 
 #[derive(Debug, PartialEq)]
 pub enum Register {
-    AL, // Low byte of A register.
-    BL, // Low byte of B register.
-    CL, // Low byte of C register.
-    DL, // Low byte of D register.
-    AH, // High byte of A register.
-    BH, // High byte of B register.
-    CH, // High byte of C register.
-    DH, // High Byte of D register.
-    AX, // Word of A register.
-    BX, // Word of B register.
-    CX, // Word of C register.
-    DX, // Word of D register.
+    AL, // Low byte of register A.
+    BL, // Low byte of register B.
+    CL, // Low byte of register C.
+    DL, // Low byte of register D.
+    AH, // High byte of register A.
+    BH, // High byte of register B.
+    CH, // High byte of register C.
+    DH, // High Byte of register D.
+    AX, // Full register A.
+    BX, // Full register B.
+    CX, // Full register C.
+    DX, // Full register D.
     SP, // Stack Pointer
     BP, // Basis Pointer
     SI, // Source Index

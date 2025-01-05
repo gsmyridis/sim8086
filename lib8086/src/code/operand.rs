@@ -69,25 +69,22 @@ pub fn get_operands(
 
 impl fmt::Display for Operand {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use Operand::*;
         match self {
-            Self::Register(reg) => write!(f, "{reg}"),
-            Self::SegmentRegister(segreg) => write!(f, "{segreg}"),
-            Self::Immediate(val) => write!(f, "{val}"),
-            Self::Memory(addr) => write!(f, "{addr}"),
+            Register(reg) => write!(f, "{reg}"),
+            SegmentRegister(segreg) => write!(f, "{segreg}"),
+            Immediate(val) => write!(f, "{val}"),
+            Memory(addr) => write!(f, "{addr}"),
         }
     }
 }
 
 pub fn get_prefix<'a>(source: &'a Operand, dest: &'a Operand) -> &'a str {
+    use Operand::*;
+    use Value::*;
     match (source, dest) {
-        (Operand::Immediate(Value::Byte(_)), Operand::Memory(_)) => "byte ",
-        (Operand::Immediate(Value::Word(val)), Operand::Memory(_)) => {
-            if (*val).abs() <= i8::MAX as i16 {
-                "word "
-            } else {
-                ""
-            }
-        }
+        (Immediate(Byte(_)), Memory(_)) => "byte ",
+        (Immediate(Word(val)), Memory(_)) if val.abs() <= i8::MAX as i16 => "word ",
         _ => "",
     }
 }
