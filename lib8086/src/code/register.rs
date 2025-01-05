@@ -18,47 +18,37 @@ pub enum Register {
     DX, // Word of D register.
     SP, // Stack Pointer
     BP, // Basis Pointer
-    SI, //
-    DI, //
+    SI, // Source Index
+    DI, // Destination Index
 }
 
 impl Register {
     /// Creates a register instance from a combination of code bytes and W bit.
     pub fn from(code: u8, w: bool) -> Self {
-        if code == 0b0 && !w {
-            Register::AL
-        } else if code == 0b000 && w {
-            Register::AX
-        } else if code == 0b001 && !w {
-            Register::CL
-        } else if code == 0b001 && w {
-            Register::CX
-        } else if code == 0b010 && !w {
-            Register::DL
-        } else if code == 0b010 && w {
-            Register::DX
-        } else if code == 0b011 && !w {
-            Register::BL
-        } else if code == 0b011 && w {
-            Register::BX
-        } else if code == 0b100 && !w {
-            Register::AH
-        } else if code == 0b100 && w {
-            Register::SP
-        } else if code == 0b101 && !w {
-            Register::CH
-        } else if code == 0b101 && w {
-            Register::BP
-        } else if code == 0b110 && !w {
-            Register::DH
-        } else if code == 0b110 && w {
-            Register::SI
-        } else if code == 0b111 && !w {
-            Register::BH
-        } else if code == 0b111 && w {
-            Register::DI
+        if w {
+            match code {
+                0b000 => Register::AX,
+                0b011 => Register::BX,
+                0b001 => Register::CX,
+                0b010 => Register::DX,
+                0b100 => Register::SP,
+                0b101 => Register::BP,
+                0b110 => Register::SI,
+                0b111 => Register::DI,
+                _ => panic!("Invalid combination of code and width"),
+            }
         } else {
-            panic!("Invalid combination of code and w");
+            match code {
+                0b000 => Register::AL,
+                0b011 => Register::BL,
+                0b001 => Register::CL,
+                0b010 => Register::DL,
+                0b100 => Register::AH,
+                0b111 => Register::BH,
+                0b101 => Register::CH,
+                0b110 => Register::DH,
+                _ => panic!("Invalid combination of code and width"),
+            }
         }
     }
 }
@@ -110,13 +100,12 @@ impl TryFrom<u8> for SegmentRegister {
 
 impl fmt::Display for SegmentRegister {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let string = match self {
+        f.write_str(match self {
             Self::ES => "es",
             Self::CS => "cs",
             Self::SS => "ss",
             Self::DS => "ds",
-        };
-        write!(f, "{string}")
+        })
     }
 }
 
