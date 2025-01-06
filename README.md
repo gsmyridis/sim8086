@@ -12,7 +12,9 @@ I encourage you to consult the
 [instruction manual](https://edge.edx.org/c4x/BITSPilani/EEE231/asset/8086_family_Users_Manual_1_.pdf)
 and consider contributing to improve and extend the simulator.
 For all instruction for which decoding and execution has been implemented, there are accompanying tests in `sim8086/tests/`.
-To run the decoding tests you must have NASM installed.
+To run the decoding tests you must have NASM installed. 
+Additionally, there is a test file that contains all available instructions `sim8086/tests/decode/test_all`, and currently fails, 
+because of runtime errors which will signify which instructions have not been implemented yet.
 
 ## Installation
 
