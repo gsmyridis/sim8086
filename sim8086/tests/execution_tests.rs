@@ -97,18 +97,18 @@ fn test_cond_jumps_1() {
     assert!(cpu.flags.parity);
 }
 
-// #[test]
-// fn test_cond_jumps_2() {
-//     let cpu = execute_test_file("test_cond_jumps_2");
-//
-//     assert_eq!(cpu.gen_regs.ax, 0x000du16.to_le_bytes());
-//     assert_eq!(cpu.gen_regs.bx, 0xfffbu16.to_le_bytes());
-//     assert_eq!(cpu.ip, 0x001cu16);
-//
-//     assert!(cpu.flags.carry);
-//     assert!(cpu.flags.aux_carry);
-//     assert!(cpu.flags.sign);
-// }
+#[test]
+fn test_cond_jumps_2() {
+    let cpu = execute_test_file("test_cond_jumps_2");
+
+    assert_eq!(cpu.gen_regs.ax, 0x000du16.to_le_bytes());
+    assert_eq!(cpu.gen_regs.bx, 0xfffbu16.to_le_bytes());
+    assert_eq!(cpu.ip, 0x001cu16);
+
+    assert!(cpu.flags.carry);
+    assert!(cpu.flags.aux_carry);
+    assert!(cpu.flags.sign);
+}
 
 #[test]
 fn test_memory_movs() {

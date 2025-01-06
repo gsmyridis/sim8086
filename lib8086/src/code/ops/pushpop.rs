@@ -11,7 +11,7 @@ macro_rules! create_push_pop_op {
         $(
            #[derive(Debug)]
             pub struct $op_name {
-                source: Operand,
+                pub operand: Operand,
             }
 
             impl $op_name {
@@ -19,28 +19,28 @@ macro_rules! create_push_pop_op {
                 pub fn try_decode_rm(bytes: &[u8]) -> DResult<Self> {
                     let mode = Mode::try_parse_byte(bytes[1])?;
                     let rm = RM::parse_byte(bytes[1]);
-                    let (source, rest) = Operand::register_or_memory(true, &mode, rm.as_u8(), &bytes[2..])?;
-                    Ok((Self { source }, rest))
+                    let (operand, rest) = Operand::register_or_memory(true, &mode, rm.as_u8(), &bytes[2..])?;
+                    Ok((Self { operand }, rest))
                 }
 
                 pub fn try_decode_reg(bytes: &[u8]) -> DResult<Self> {
                     let reg = Reg::parse_byte_low(bytes[0]);
                     let register = Register::from(reg.into(), true);
-                    let source = Operand::Register(register);
-                    Ok((Self { source }, 1))
+                    let operand = Operand::Register(register);
+                    Ok((Self { operand }, 1))
                 }
 
                 pub fn try_decode_seg_reg(bytes: &[u8]) -> DResult<Self> {
                     let sr = SR::parse_byte(bytes[0]);
                     let segreg = SegmentRegister::try_from(sr.as_u8()).unwrap();
-                    let source = Operand::SegmentRegister(segreg);
-                    Ok((Self { source }, 1))
+                    let operand = Operand::SegmentRegister(segreg);
+                    Ok((Self { operand }, 1))
                 }
             }
 
             impl fmt::Display for $op_name {
                 fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-                    match &self.source {
+                    match &self.operand {
                         Operand::Memory(addr) => write!(f, "{} word {addr}", $mnemonic),
                         Operand::Register(reg) => write!(f, "{} {reg}", $mnemonic),
                         Operand::SegmentRegister(segreg) => write!(f, "{} {segreg}", $mnemonic),

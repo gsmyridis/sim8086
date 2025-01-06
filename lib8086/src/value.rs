@@ -21,6 +21,7 @@ impl Value {
     }
 
     /// Returns whether the value is zero.
+    #[inline]
     pub fn is_zero(&self) -> bool {
         match self {
             Self::Byte(v) => *v == 0,
@@ -29,6 +30,7 @@ impl Value {
     }
 
     /// Returns whether the value is positive.
+    #[inline]
     pub fn is_negative(&self) -> bool {
         match self {
             Self::Byte(v) => *v < 0,
@@ -37,10 +39,20 @@ impl Value {
     }
 
     /// Returns whether the value is positive.
+    #[inline]
     pub fn is_even(&self) -> bool {
         match self {
             Self::Byte(v) => *v % 2 == 0,
             Self::Word(v) => *v % 2 == 0,
+        }
+    }
+
+    /// Returns the inner value as a 16-bit integer.
+    #[inline]
+    pub fn as_u16(&self) -> u16 {
+        match self {
+            Self::Byte(v) => *v as u16,
+            Self::Word(v) => *v as u16,
         }
     }
 
@@ -54,16 +66,7 @@ impl Value {
                 let aux_carry = (*v1 & 0xF) + (*v2 & 0xF) > 0xF;
                 (Self::Word(val), ov, carry, aux_carry)
             }
-            (Self::Byte(v1), Self::Byte(v2)) => todo!(),
-            _ => panic!("Overflowing add has been implemented only for word-word."),
-        }
-    }
-
-    /// Returns the inner value as a 16-bit integer.
-    pub fn as_u16(&self) -> u16 {
-        match self {
-            Self::Byte(v) => *v as u16,
-            Self::Word(v) => *v as u16,
+            _ => panic!("Flagged add has been implemented only for word-word."),
         }
     }
 
@@ -77,8 +80,35 @@ impl Value {
                 let aux_carry = (*v1 & 0xF) < (*v2 & 0xF);
                 (Self::Word(val), ov, carry, aux_carry)
             }
-            (Self::Byte(v1), Self::Byte(v2)) => todo!(),
-            _ => panic!("Overflowing sub has been implemented only for word-word."),
+            _ => panic!("Flagged sub has been implemented only for word-word."),
+        }
+    }
+
+    /// Performes a carrying add between two values returning the result and 
+    /// the oveflow, carry and auxiliary flags.
+    pub fn flagged_carrying_add(&self, other: &Value, carry: bool) -> (Value, bool, bool, bool) {
+        let carry = if carry { Value::Word(1i16) } else { Value::Word(0i16) };
+        match (self, other) {
+            (Self::Word(v1), Self::Word(v2)) => {
+                let (v1, ov1, cf1, acf1) = self.flagged_add(other);
+                let (v2, ov2, cf2, acf2) = v1.flagged_add(&carry);
+                todo!()
+            }
+            _ => panic!("Flagged add has been implemented only for word-word."),
+        }
+    }
+
+    /// Performes a carrying sub between two values returning the result and 
+    /// the oveflow, carry and auxiliary flags.
+    pub fn flagged_carrying_sub(&self, other: &Value, carry: bool) -> (Value, bool, bool, bool) {
+        let carry = if carry { Value::Word(1i16) } else { Value::Word(0i16) };
+        match (self, other) {
+            (Self::Word(v1), Self::Word(v2)) => {
+                let (v1, ov1, cf1, acf1) = self.flagged_sub(other);
+                let (v2, ov2, cf2, acf2) = v1.flagged_sub(&carry);
+                todo!()
+            }
+            _ => panic!("Flagged carrying add has been implemented only for word-word."),
         }
     }
 

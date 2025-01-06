@@ -56,10 +56,10 @@ impl Cpu {
             // Execute instruction
             match instr {
                 Instruction::Mov(op) => self.exec_mov(op),
-                Instruction::Push(_op) => todo!(),
-                Instruction::Pop(_op) => todo!(),
+                Instruction::Push(op) => self.exec_push(op),
+                Instruction::Pop(op) => self.exec_pop(op),
                 Instruction::Num(op) => self.exec_numeric(op),
-                Instruction::CondJump(op) => self.exec_cond_jump(op),
+                Instruction::CondJump(op) => self.exec_conditional_jump(op),
                 Instruction::Halt => break,
             }?
         }
@@ -150,44 +150,45 @@ impl Cpu {
 
     /// Executes an arithmetic instruction: ADD, ADC, SUB, SBB or CMP.
     fn exec_numeric(&mut self, op: &NumOp) -> EResult<()> {
+        use NumOp::*;
+
+        // Closure that extracts values from operands, executes the specified operation
+        // and sets the flags and destination operand.
+        let mut exop = |source: &Operand,
+                        destination: &Operand,
+                        f: fn(&Value, &Value) -> (Value, bool, bool, bool)|
+         -> EResult<()> {
+            let sval = self.get_operand_value(source);
+            let dval = self.get_destination_value(destination)?;
+
+            let (val, overflow, carry, aux_carry) = f(&dval, &sval);
+            self.flags
+                .set_overflow_aux_carry(overflow, carry, aux_carry);
+            self.set_operand_value(destination, val)
+        };
+
         match op {
-            NumOp::Add {
+            Add {
                 source,
                 destination,
-            } => {
-                let sval = self.get_operand_value(source);
-                let dval = self.get_destination_value(destination)?;
-
-                let (val, overflow, carry, aux_carry) = dval.flagged_add(&sval);
-                self.flags
-                    .set_overflow_aux_carry(overflow, carry, aux_carry);
-                self.set_operand_value(destination, val)
-            }
-            NumOp::Adc {
+            } => exop(&source, &destination, |dval, sval| dval.flagged_add(sval)),
+            Adc {
                 source,
                 destination,
             } => {
                 todo!()
             }
-            NumOp::Sub {
+            Sub {
                 source,
                 destination,
-            } => {
-                let sval = self.get_operand_value(source);
-                let dval = self.get_destination_value(destination)?;
-
-                let (val, overflow, carry, aux_carry) = dval.flagged_sub(&sval);
-                self.flags
-                    .set_overflow_aux_carry(overflow, carry, aux_carry);
-                self.set_operand_value(destination, val)
-            }
-            NumOp::Sbb {
+            } => exop(&source, &destination, |dval, sval| dval.flagged_sub(sval)),
+            Sbb {
                 source,
                 destination,
             } => {
                 todo!()
             }
-            NumOp::Cmp {
+            Cmp {
                 source,
                 destination,
             } => {
@@ -204,17 +205,30 @@ impl Cpu {
     }
 
     /// Executes a PUSH instruction.
-    fn exec_push(&mut self, _op: PushOp) -> Result<(), ()> {
-        // Extract value from source
-        // Put it in destination
-        todo!()
+    ///
+    /// Decrements the stack-pointer by 2 and then transfers a word from the source
+    /// operand to the top of the stack now pointed to by the stack-pointer.
+    fn exec_push(&mut self, op: &PushOp) -> EResult<()> {
+        self.gen_regs.sp[1] += 1;
+
+        let val = self.get_operand_value(&op.operand).as_u16();
+        let sp = u16::from_le_bytes(self.gen_regs.sp) as usize;
+        self.mem[sp..sp + 2].copy_from_slice(&val.to_le_bytes());
+
+        Ok(())
     }
 
     /// Executes a POP instruction.
-    fn exec_pop(&mut self, _op: PopOp) -> Result<(), ()> {
-        // Extract value from source
-        // Put it in destination
-        todo!()
+    ///
+    /// Copies the word at the top of the stack to the destination operand
+    /// and then increments the stack-pointer by 2.
+    fn exec_pop(&mut self, op: &PopOp) -> EResult<()> {
+        let sp = u16::from_le_bytes(self.gen_regs.sp) as usize;
+        let popped = Value::word([self.mem[sp], self.mem[sp + 1]]);
+        self.set_operand_value(&op.operand, popped)?;
+
+        self.gen_regs.sp[1] += 2;
+        Ok(())
     }
 
     fn jump(&mut self, condition: bool, offset: i8) -> EResult<()> {
@@ -227,31 +241,55 @@ impl Cpu {
         Ok(())
     }
 
-    /// Executes a JUMP instruction.
-    fn exec_cond_jump(&mut self, op: &CondJumpOp) -> EResult<()> {
-        match op {
-            CondJumpOp::Equal(n) => self.jump(self.flags.zero, *n)?,
-            CondJumpOp::Less(n) => self.jump(self.flags.sign, *n)?,
-            CondJumpOp::LessEqual(n) => self.jump(self.flags.sign | self.flags.zero, *n)?,
-            CondJumpOp::Below(_n) => todo!(),
-            CondJumpOp::BelowEqual(_n) => todo!(),
-            CondJumpOp::ParityEven(n) => self.jump(self.flags.parity, *n)?,
-            CondJumpOp::Overflow(n) => self.jump(self.flags.overflow, *n)?,
-            CondJumpOp::NotEqual(n) => self.jump(!self.flags.zero, *n)?,
-            CondJumpOp::Sign(n) => self.jump(self.flags.sign, *n)?,
-            CondJumpOp::GreaterEqual(n) => self.jump(self.flags.sign | self.flags.zero, *n)?,
-            CondJumpOp::Greater(n) => self.jump(!self.flags.sign, *n)?,
-            CondJumpOp::AboveEqual(_n) => todo!(),
-            CondJumpOp::Above(_n) => todo!(),
-            CondJumpOp::ParityOdd(n) => self.jump(!self.flags.parity, *n)?,
-            CondJumpOp::NotOverflow(n) => self.jump(!self.flags.overflow, *n)?,
-            CondJumpOp::NotSign(n) => self.jump(!self.flags.sign, *n)?,
-            CondJumpOp::CXZero(_n) => todo!(),
-            CondJumpOp::Loop(_n) => todo!(),
-            CondJumpOp::LoopEqual(_n) => todo!(),
-            CondJumpOp::LoopNEqual(_n) => todo!(),
-        }
-        Ok(())
+    /// Executes a CONDITIONAAL JUMP instruction.
+    ///
+    /// For each kind of conditional jump, a condition is checked, and if it's met,
+    /// then the instruction pointer is offset by the appropriate amount.
+    fn exec_conditional_jump(&mut self, op: &CondJumpOp) -> EResult<()> {
+        // Decrements the CX register by 1 and returns if the updated
+        // value it is non-zero.
+        let decrement_cx = |cx: &mut [u8; 2]| -> bool {
+            let updated = u16::from_le_bytes(*cx) - 1;
+            *cx = updated.to_le_bytes();
+            updated != 0
+        };
+
+        let (condition, &offset) = match op {
+            // Equality and parity conditions
+            CondJumpOp::Equal(n) => (self.flags.zero, n),
+            CondJumpOp::NotEqual(n) => (!self.flags.zero, n),
+            CondJumpOp::ParityEven(n) => (self.flags.parity, n),
+            CondJumpOp::ParityOdd(n) => (!self.flags.parity, n),
+            CondJumpOp::Overflow(n) => (self.flags.overflow, n),
+            CondJumpOp::NotOverflow(n) => (!self.flags.overflow, n),
+            CondJumpOp::Sign(n) => (self.flags.sign, n),
+            CondJumpOp::NotSign(n) => (!self.flags.sign, n),
+
+            // Relational conditions
+            CondJumpOp::Greater(n) => (
+                !self.flags.zero & (self.flags.sign == self.flags.overflow),
+                n,
+            ),
+            CondJumpOp::GreaterEqual(n) => (self.flags.sign == self.flags.overflow, n),
+            CondJumpOp::Less(n) => (self.flags.sign != self.flags.overflow, n),
+            CondJumpOp::LessEqual(n) => (
+                (self.flags.sign != self.flags.overflow) | self.flags.zero,
+                n,
+            ),
+            CondJumpOp::Above(n) => (!self.flags.zero & !self.flags.overflow, n),
+            CondJumpOp::AboveEqual(n) => (!self.flags.carry, n),
+            CondJumpOp::Below(n) => (self.flags.carry, n),
+            CondJumpOp::BelowEqual(n) => (self.flags.carry | self.flags.zero, n),
+
+            // Loop and count-based conditions
+            CondJumpOp::CXZero(n) => (u16::from_le_bytes(self.gen_regs.cx) == 0, n),
+            CondJumpOp::Loop(n) => (decrement_cx(&mut self.gen_regs.cx), n),
+            CondJumpOp::LoopEqual(n) => (decrement_cx(&mut self.gen_regs.cx) & self.flags.zero, n),
+            CondJumpOp::LoopNEqual(n) => {
+                (decrement_cx(&mut self.gen_regs.cx) & !self.flags.zero, n)
+            }
+        };
+        self.jump(condition, offset)
     }
 }
 

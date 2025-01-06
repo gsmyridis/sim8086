@@ -62,7 +62,8 @@ fn main() -> Result<(), DecodeError> {
 
             if let Some(opath) = output {
                 let mut file = fs::File::create(opath).expect("Failed to create new output file");
-                file.write_all(&cpu.mem).expect("Failed to write memory into output file");
+                file.write_all(&cpu.mem)
+                    .expect("Failed to write memory into output file");
             }
         }
     }

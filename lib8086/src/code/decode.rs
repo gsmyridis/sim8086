@@ -1,6 +1,5 @@
 use super::ops::*;
 use super::{DResult, DecodeError, Instruction, InstructionQueue};
-use crate::code::ops::OpCode::*;
 
 pub struct Decoder {
     buffer: Vec<u8>,
@@ -31,6 +30,7 @@ impl Decoder {
     /// reference to the array with the rest of the bytes. Otherwise, it returns the decoding.
     /// error.
     pub fn try_decode_next(bytes: &[u8]) -> DResult<Instruction> {
+        use crate::code::ops::OpCode::*;
         match OpCode::parse(bytes[0])? {
             MovRegRM => {
                 let (op, size) = MovOp::try_parse_reg_rm(bytes)?;
