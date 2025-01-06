@@ -63,8 +63,8 @@ impl Cpu {
     #[inline]
     pub fn load_instructions(&mut self, buffer: &[u8]) {
         self.mem[self.seg_regs.cs()..self.seg_regs.cs() + buffer.len()]
-                    .copy_from_slice(buffer);
-        self.mem[self.seg_regs.cs() + buffer.len() + 1] = HALT;
+                    .copy_from_slice(&buffer);
+        self.mem[self.seg_regs.cs() + buffer.len()] = HALT;
     }
 
     /// Executes all the loaded instructions.

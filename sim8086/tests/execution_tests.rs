@@ -1,18 +1,15 @@
 use std::path::Path;
 
-use lib8086::{Cpu, Decoder};
+use lib8086::Cpu;
 
 fn execute_file(filename: &str) -> Cpu {
     let buffer_path = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("tests/data/execute")
         .join(filename);
     let buffer = std::fs::read(buffer_path).expect("Failed to read test file.");
-    //let decoder = Decoder::new(buffer);
-    //let i_queue = decoder.decode().expect("Decoding failed.");
     let mut cpu = Cpu::new();
-    cpu.load_instructions(buffer);
-    cpu.execute_all().unwrap();
-    //cpu.execute(&i_queue).expect("Execution failed.");
+    cpu.load_instructions(&buffer);
+    cpu.execute().unwrap();
     cpu
 }
 
