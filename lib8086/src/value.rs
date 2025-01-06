@@ -84,10 +84,14 @@ impl Value {
         }
     }
 
-    /// Performes a carrying add between two values returning the result and 
+    /// Performes a carrying add between two values returning the result and
     /// the oveflow, carry and auxiliary flags.
     pub fn flagged_carrying_add(&self, other: &Value, carry: bool) -> (Value, bool, bool, bool) {
-        let carry = if carry { Value::Word(1i16) } else { Value::Word(0i16) };
+        let carry = if carry {
+            Value::Word(1i16)
+        } else {
+            Value::Word(0i16)
+        };
         match (self, other) {
             (Self::Word(v1), Self::Word(v2)) => {
                 let (v1, ov1, cf1, acf1) = self.flagged_add(other);
@@ -98,10 +102,14 @@ impl Value {
         }
     }
 
-    /// Performes a carrying sub between two values returning the result and 
+    /// Performes a carrying sub between two values returning the result and
     /// the oveflow, carry and auxiliary flags.
     pub fn flagged_carrying_sub(&self, other: &Value, carry: bool) -> (Value, bool, bool, bool) {
-        let carry = if carry { Value::Word(1i16) } else { Value::Word(0i16) };
+        let carry = if carry {
+            Value::Word(1i16)
+        } else {
+            Value::Word(0i16)
+        };
         match (self, other) {
             (Self::Word(v1), Self::Word(v2)) => {
                 let (v1, ov1, cf1, acf1) = self.flagged_sub(other);

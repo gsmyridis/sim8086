@@ -38,6 +38,16 @@ impl SegmentRegisters {
             _ => panic!("The value of a segment register can be set to a word value."),
         }
     }
+
+    /// Returns the Code Segment memory stored in the `CS` segment
+    /// register.
+    ///
+    /// The value is returned as usize because it's used in memory
+    /// indexing.
+    #[inline]
+    pub fn cs(&self) -> usize {
+        u16::from_le_bytes(self.cs) as usize
+    }
 }
 
 impl fmt::Display for SegmentRegisters {

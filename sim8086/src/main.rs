@@ -49,11 +49,13 @@ fn main() -> Result<(), DecodeError> {
         }
         Command::Execute { path, output } => {
             let buffer = fs::read(path).expect("Failed to read input byte-code file.");
-            let decoder = Decoder::new(buffer);
-            let iqueue = decoder.decode()?;
 
             let mut cpu = Cpu::new();
-            cpu.execute(&iqueue).unwrap();
+            cpu.load_instructions(&buffer);
+            cpu.execute().expect("Execution failed");
+
+            let decoder = Decoder::new(buffer);
+            let iqueue = decoder.decode()?;
 
             println!("\nINSTRUCTIONS");
             println!("-------------------");

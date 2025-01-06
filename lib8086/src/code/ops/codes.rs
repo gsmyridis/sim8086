@@ -27,7 +27,6 @@ macro_rules! create_opcodes {
 }
 
 create_opcodes! {
-    // MovOps
     (MovRegRM, "100010");
     (MovImRM, "1100011");
     (MovImReg, "1011");
@@ -35,7 +34,6 @@ create_opcodes! {
     (MovRMSegReg, "10001110");
     (MovSegRegRM, "10001100");
 
-    // Arithmetic Ops
     (NumImRM, "100000");
 
     (AddRMReg, "000000");
@@ -50,34 +48,32 @@ create_opcodes! {
     (SbbImAcc, "0001110");
     (CmpImAcc, "0011110");
 
-    // Jump Ops
-    (JumpEqual, "01110100");        // Jump on Equal / Jump on Zero
-    (JumpLess, "01111100");         // Jump on Less
-    (JumpLessEq, "01111110");       // Jump on Less or Equal
-    (JumpBelow, "01110010");        // Jump on Below
-    (JumpBelowEq, "01110110");      // Jump on Below or Equal
-    (JumpParityEven, "01111010");   // Jump on Parity Even
-    (JumpOverflow, "01110000");     // Jump on Overflow
-    (JumpNEqual, "01110101");       // Jump on Not Equal / Jump on Not Zero
-    (JumpSign, "01111000");         // Jump on Sign
-    (JumpGreaterEq, "01111101");    // Jump on Greater or Equal
-    (JumpGreater, "01111111");      // Jump on Greater
-    (JumpAboveEq, "01110011");      // Jump on Above or Equal
-    (JumpAbove, "01110111");        // Jump on Above
-    (JumpParityOdd, "01111011");    // Jump on Odd Parity
-    (JumpNOverflow, "01110001");    // Jump on Not Overflow
-    (JumpNSign, "01111001");        // Jump on Not Sign
-    (JumpCXZero, "11100011");       // Jump on CX Zero
+    (JumpEqual, "01110100");
+    (JumpLess, "01111100");
+    (JumpLessEq, "01111110");
+    (JumpBelow, "01110010");
+    (JumpBelowEq, "01110110");
+    (JumpParityEven, "01111010");
+    (JumpOverflow, "01110000");
+    (JumpNEqual, "01110101");
+    (JumpSign, "01111000");
+    (JumpGreaterEq, "01111101");
+    (JumpGreater, "01111111");
+    (JumpAboveEq, "01110011");
+    (JumpAbove, "01110111");
+    (JumpParityOdd, "01111011");
+    (JumpNOverflow, "01110001");
+    (JumpNSign, "01111001");
+    (JumpCXZero, "11100011");
+    (Loop, "11100010");
+    (LoopEqual, "11100001");
+    (LoopNEqual, "11100000");
 
-    // Loop Ops
-    (Loop, "11100010");             // Loop CX times
-    (LoopEqual, "11100001");        // Loop while Equal / Zero
-    (LoopNEqual, "11100000");       // Loop while Not Equal / Zero
-
-    // Push Pop Ops
     (PushRegRM, "11111111");
     (PushReg, "01010");
     (PopRegRM, "10001111");
     (PopReg, "01011");
     (PushPopSeg, "000");
+
+    (Halt, "11110100");
 }

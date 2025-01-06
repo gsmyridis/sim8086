@@ -7,10 +7,12 @@ fn execute_file(filename: &str) -> Cpu {
         .join("tests/data/execute")
         .join(filename);
     let buffer = std::fs::read(buffer_path).expect("Failed to read test file.");
-    let decoder = Decoder::new(buffer);
-    let i_queue = decoder.decode().expect("Decoding failed.");
+    //let decoder = Decoder::new(buffer);
+    //let i_queue = decoder.decode().expect("Decoding failed.");
     let mut cpu = Cpu::new();
-    cpu.execute(&i_queue).expect("Execution failed.");
+    cpu.load_instructions(buffer);
+    cpu.execute_all().unwrap();
+    //cpu.execute(&i_queue).expect("Execution failed.");
     cpu
 }
 
@@ -136,7 +138,6 @@ fn test_memory_num_loop() {
     assert!(cpu.flags.zero);
 }
 
-
 #[test]
 fn test_add_loop() {
     let cpu = execute_file("add_loop");
@@ -160,9 +161,8 @@ fn test_draw_rectangle() {
 // #[test]
 // fn test_draw_rectangle_2() {
 //     let cpu = execute_file("draw_rectangle_2");
-// 
+//
 //     assert_eq!(cpu.gen_regs.cx, 0x4004u16.to_le_bytes());
 //     assert_eq!(cpu.gen_regs.bp, 0x02fcu16.to_le_bytes());
 //     assert_eq!(cpu.ip, 0x0044u16);
 // }
-

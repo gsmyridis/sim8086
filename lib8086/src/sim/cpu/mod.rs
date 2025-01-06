@@ -11,10 +11,12 @@ mod flags;
 use flags::Flags;
 
 use super::{EResult, ExecutionError};
-use crate::code::{ops::*, EffectiveAddr, Instruction, InstructionQueue, Operand};
+use crate::code::{ops::*, EffectiveAddr, Instruction, Operand, Decoder};
 use crate::value::Value;
 
 const MEM_SIZE: usize = 64 * 1024;
+const HALT: u8 = 0xF4;
+
 
 #[derive(Debug)]
 pub struct Cpu {
@@ -44,23 +46,50 @@ impl Cpu {
         Self::default()
     }
 
-    /// Executes a stream of instructions.
-    pub fn execute(&mut self, iqueue: &InstructionQueue) -> EResult<()> {
-        loop {
-            // Fetch next instruction and then increment the instruction pointer.
-            let (instr, offset) = iqueue
-                .get(self.ip as usize)
-                .ok_or(ExecutionError::InstructionOffset)?;
-            self.ip += *offset as u16;
+    /// Returns the next instruction's index in memory.
+    ///
+    /// It is calculated by starting at the code segment memory, `CS`,
+    /// and offsetting by the instruction pointer, `IP`.
+    #[inline]
+    pub fn ip_abs(&self) -> usize {
+         self.seg_regs.cs() + (self. ip as usize)
+    }
 
-            // Execute instruction
-            match instr {
-                Instruction::Mov(op) => self.exec_mov(op),
-                Instruction::Push(op) => self.exec_push(op),
-                Instruction::Pop(op) => self.exec_pop(op),
-                Instruction::Num(op) => self.exec_numeric(op),
-                Instruction::CondJump(op) => self.exec_conditional_jump(op),
-                Instruction::Halt => break,
+    /// Loads the byte code in memory.
+    ///
+    /// The loaded bytes are saved in the code segment which begins at the address
+    /// stored in the `CS` segment register. To signal the end of the program we 
+    /// must either store its offset or add a halt instruction. I chose the latter.
+    #[inline]
+    pub fn load_instructions(&mut self, buffer: &[u8]) {
+        self.mem[self.seg_regs.cs()..self.seg_regs.cs() + buffer.len()]
+                    .copy_from_slice(buffer);
+        self.mem[self.seg_regs.cs() + buffer.len() + 1] = HALT;
+    }
+
+    /// Executes all the loaded instructions.
+    ///
+    /// To signal the end of the program we  must either store its offset or add a halt 
+    /// instruction. I chose the latter. When the halt instruction is met, the execution 
+    /// halts and the istruction pointer is decremented by one, the size of the halt 
+    /// instruction.
+    pub fn execute(&mut self) -> EResult<()> {
+        loop {
+            let rem_bytes = &self.mem[self.ip_abs()..];
+            let (instruction, size) = Decoder::try_decode_next(rem_bytes)
+                .expect("Failed to decode next instruction");
+            self.ip += size as u16;
+
+            match instruction {
+                Instruction::Mov(ref op) => self.exec_mov(op),
+                Instruction::Push(ref op) => self.exec_push(op),
+                Instruction::Pop(ref op) => self.exec_pop(op),
+                Instruction::Num(ref op) => self.exec_numeric(op),
+                Instruction::CondJump(ref op) => self.exec_conditional_jump(op),
+                Instruction::Halt => {
+                    self.ip -= 1;
+                    break
+                },
             }?
         }
         Ok(())
@@ -171,20 +200,20 @@ impl Cpu {
             Add {
                 source,
                 destination,
-            } => exop(&source, &destination, |dval, sval| dval.flagged_add(sval)),
+            } => exop(source, destination, |dval, sval| dval.flagged_add(sval)),
             Adc {
-                source,
-                destination,
+                source: _,
+                destination: _,
             } => {
                 todo!()
             }
             Sub {
                 source,
                 destination,
-            } => exop(&source, &destination, |dval, sval| dval.flagged_sub(sval)),
+            } => exop(source, destination, |dval, sval| dval.flagged_sub(sval)),
             Sbb {
-                source,
-                destination,
+                source: _,
+                destination: _,
             } => {
                 todo!()
             }

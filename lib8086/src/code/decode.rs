@@ -32,6 +32,7 @@ impl Decoder {
     pub fn try_decode_next(bytes: &[u8]) -> DResult<Instruction> {
         use crate::code::ops::OpCode::*;
         match OpCode::parse(bytes[0])? {
+            Halt => Ok((Instruction::Halt, 1)),
             MovRegRM => {
                 let (op, size) = MovOp::try_parse_reg_rm(bytes)?;
                 Ok((Instruction::Mov(op), size))
